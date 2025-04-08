@@ -15,4 +15,3 @@ urlpatterns = [
          AuthentificationView.as_view(),
          name="rest_login"),
 ]
-# asdasd
