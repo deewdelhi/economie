@@ -67,7 +67,7 @@ const SignUp = (props: any) => {
         const dateObj = new Date(dob);
 
         try {
-            fetch("http://127.0.0.1:8000/users/register/", {
+            fetch("http://127.0.0.1:8000/users/registration/", {
                 method: "POST",
                 body: JSON.stringify({
                     username: username,
