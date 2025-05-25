@@ -11,16 +11,17 @@ class EventList(viewsets.ModelViewSet):
     serializer_class = EventSerializer
 
     def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
         # Get the instance of the event
-        if "user" in self.request.GET:
-            user = int(self.request.GET["user"])
-        instance = self.get_object()
+        # if "user" in self.request.GET:
+        #     user = int(self.request.GET["user"])
+        # instance = self.get_object()
+        #
+        # # Check if the current user is the creator of the event
+        # if user != instance.creator.id:
+        #     return Response({'detail': 'You are not allowed to update this event.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Check if the current user is the creator of the event
-        if user != instance.creator.id:
-            return Response({'detail': 'You are not allowed to update this event.'}, status=status.HTTP_403_FORBIDDEN)
-
-        return super().update(request)
+        return super().update(request, *args, **kwargs)
 
     def get_queryset(self):
         events = Event.objects.all()
