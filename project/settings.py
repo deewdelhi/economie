@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'user',
+    'event',
+    'preference',
+    'skill'
 ]
 
 AUTH_USER_MODEL = 'user.User'
