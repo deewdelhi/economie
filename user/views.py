@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 
 from user.models import User
 from user.serializers import (
-    AuthentificationSerializer,
+    AuthenticationSerializer,
     UserSerializer,
     RegisterUserSerializer,
 )
@@ -32,11 +32,11 @@ class UserRegisterView(RegisterView):
         )
 
 
-class AuthentificationView(LoginView):
-    serializer_class = AuthentificationSerializer
+class AuthenticationView(LoginView):
+    serializer_class = AuthenticationSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = AuthentificationSerializer(
+        serializer = AuthenticationSerializer(
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)

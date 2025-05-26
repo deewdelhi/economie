@@ -39,7 +39,7 @@ const Login = (props: any) => {
         }
 
         try {
-            fetch("http://127.0.0.1:8000/users/login/", {
+            fetch("http://127.0.0.1:8000/users/dj-rest-auth/login/", {
                 method: "POST",
                 body: JSON.stringify({
                     username: username,

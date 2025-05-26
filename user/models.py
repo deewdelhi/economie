@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
+from preference.models import Preference
+from skill.models import Skill
+
 
 def validate_rating(value):
     if value < 0 or value > 5:
@@ -24,7 +27,8 @@ class User(AbstractUser):
     description = models.TextField()
     rating = models.IntegerField(validators=[validate_rating], default=0)
     date_of_birth = models.DateField(default=date.today)
-
+    preferences = models.ManyToManyField(Preference, blank=True)
+    skills = models.ManyToManyField(Skill, blank=True)
 
     class Meta:
         app_label = 'user'

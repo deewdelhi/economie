@@ -22,6 +22,8 @@ class UserSerializer(serializers.ModelSerializer):
             "role",
             "date_joined",
             "date_of_birth",
+            "skills",
+            "preferences"
         )
 
 
@@ -39,7 +41,7 @@ class RegisterUserSerializer(RegisterSerializer):
         user.save()
 
 
-class AuthentificationSerializer(LoginSerializer, serializers.ModelSerializer):
+class AuthenticationSerializer(LoginSerializer, serializers.ModelSerializer):
     username = serializers.CharField(max_length=100)
     password = serializers.CharField(max_length=100)
 

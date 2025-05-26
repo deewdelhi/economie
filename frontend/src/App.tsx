@@ -43,6 +43,7 @@ import "./App.css";
 import Welcome from "./components/LoginSignUpComponents/Welcome";
 import Login from "./components/LoginSignUpComponents/Login";
 import SignUp from "./components/LoginSignUpComponents/SignUp";
+import ShowAllEvents from "./components/EventsComponent/showAllEvents.tsx";
 // import Logout from "./components/LoginSignUpComponents/Logout";
 
 // import UserRecipeList from "./components/RecipeComponents/userRecipes";
@@ -85,17 +86,17 @@ function App() {
           }
         />
 
-        {/* <Route
+        <Route
                     path="/showlist/*"
-                    element={<ShowAllRecipes></ShowAllRecipes>}
+                    element={<ShowAllEvents></ShowAllEvents>}
                 />
-                <Route path="/logout" element={<Logout></Logout>} />
+                {/*<Route path="/logout" element={<Logout></Logout>} />*/}
 
-                <Route
+                {/*<Route*/}
 
-                    path="/userRecipes/*"
-                    element={<UserRecipeList ></UserRecipeList>}
-                /> */}
+                {/*    path="/userRecipes/*"*/}
+                {/*    element={<UserRecipeList ></UserRecipeList>}*/}
+                {/*/> */}
       </Routes>
     </div>
   );
