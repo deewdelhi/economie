@@ -1,7 +1,8 @@
 import { Event } from "../../models/Event";
 import React, { useState, useEffect, CSSProperties } from "react";
-import { Link } from "react-router-dom";
+import {Link, Route, Routes} from "react-router-dom";
 import EventDetailsForm from "./eventDetailsForm.tsx";
+import AddEventForm from "./addEventForm.tsx";
 
 const EventList = () => {
     const [events, setEvents] = useState<Event[]>([]);
@@ -101,6 +102,10 @@ const EventList = () => {
                 />
                 <button style={styles.inputButton} onClick={() => setCurrentPage(1)}>Search</button>
             </div>
+            {/* Add a Link to the new form component */}
+            <Link to="showlist/add-event">
+                <button style={styles.inputButton}>Add New Event</button>
+            </Link>
 
             <div style={styles.eventsContainer}>
                 {events.map((event, index) => (
@@ -150,6 +155,11 @@ const EventList = () => {
                 >
                     Next
                 </button>
+
+                <Routes>
+                    {/* <Route path="showlist/details" element={<RecipeDetailsForm recipeDetail={recipe} />} /> */}
+                    <Route path="showlist/add-event" Component={AddEventForm} />
+                </Routes>
             </div>
         </div>
     );

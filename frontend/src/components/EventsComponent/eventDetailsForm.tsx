@@ -6,6 +6,7 @@ import {prototypejs} from "globals";
 import {Skill} from "../../models/Skill.ts";
 import Popup from "./PopUp.tsx";
 import DeleteEvent from "./deleteEvent.tsx";
+import UpdateEventForm from "./updateEventForm.tsx";
 
 
 const EventDetailsForm = (props: { eventDetail: any }) => {
