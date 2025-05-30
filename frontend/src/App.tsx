@@ -44,6 +44,7 @@ import Welcome from "./components/LoginSignUpComponents/Welcome";
 import Login from "./components/LoginSignUpComponents/Login";
 import SignUp from "./components/LoginSignUpComponents/SignUp";
 import ShowAllEvents from "./components/EventsComponent/showAllEvents.tsx";
+import Logout from "./components/LoginSignUpComponents/Logout.tsx";
 // import Logout from "./components/LoginSignUpComponents/Logout";
 
 // import UserRecipeList from "./components/RecipeComponents/userRecipes";
@@ -90,7 +91,7 @@ function App() {
                     path="/showlist/*"
                     element={<ShowAllEvents></ShowAllEvents>}
                 />
-                {/*<Route path="/logout" element={<Logout></Logout>} />*/}
+                <Route path="/logout" element={<Logout></Logout>} />
 
                 {/*<Route*/}
 
