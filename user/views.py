@@ -4,6 +4,9 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView
 from rest_framework.authtoken.models import Token
+from user.permissions import IsOwnerOrReadOnly
+from rest_framework.permissions import IsAuthenticated
+
 
 from user.models import User
 from user.serializers import (
@@ -16,6 +19,7 @@ from user.serializers import (
 class RegularUserList(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
 
 class UserRegisterView(RegisterView):
