@@ -14,8 +14,9 @@ const DeleteEvent = (props: { eventToDelete: any }) => {
         fetch(`http://127.0.0.1:8000/events/${props.eventToDelete.id}`, {
             method: "DELETE",
             headers: {
-                Authorization: "Bearer " + getAuthToken(),
-            },
+                'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+            }
         })
             .then((response) => {
                 response.json();

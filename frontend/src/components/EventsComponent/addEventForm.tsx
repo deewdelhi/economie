@@ -1,7 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import { Preference } from "../../models/Preference";
 import { Skill } from "../../models/Skill";
-import { getUserID } from "../../util/auth";
+import {getAuthToken, getUserID} from "../../util/auth";
 
 const AddEventForm = () => {
     const [preferences, setPreferences] = useState<Preference[]>([]);
@@ -29,6 +29,14 @@ const AddEventForm = () => {
                 const [prefRes, skillRes] = await Promise.all([
                     fetch("http://127.0.0.1:8000/preferences/?format=json"),
                     fetch("http://127.0.0.1:8000/skills/?format=json"),
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 ]);
                 const prefData = await prefRes.json();
                 const skillData = await skillRes.json();
@@ -85,6 +93,7 @@ const AddEventForm = () => {
                     creator: getUserID(),
                 }),
                 headers: {
+                    'Authorization': `token ${getAuthToken()}`,
                     Accept: "application/json",
                     "Content-Type": "application/json",
                 },

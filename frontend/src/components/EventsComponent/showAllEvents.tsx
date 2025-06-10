@@ -5,6 +5,7 @@ import EventDetailsForm from "./eventDetailsForm.tsx";
 import AddEventForm from "./addEventForm.tsx";
 import { FaSearch } from "react-icons/fa";
 import {VscAccount} from "react-icons/vsc";
+import {getAuthToken} from "../../util/auth.tsx";
 
 const EventList = () => {
     const [events, setEvents] = useState<Event[]>([]);
@@ -30,13 +31,30 @@ const EventList = () => {
     const fetchData = async () => {
             try {
                 const response2 = await fetch(
-                    `http://127.0.0.1:8000/events/?${filters}&format=json`
+                    `http://127.0.0.1:8000/events/?${filters}&format=json`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
+                console.log('token ' + getAuthToken())
                 const data2 = await response2.json();
                 setAllEvents(data2);
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/events/?page=${currentPage}&${filters}&format=json`
+                    `http://127.0.0.1:8000/events/?page=${currentPage}&${filters}&format=json`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data = await response.json();
                 setEvents(data);
@@ -54,12 +72,28 @@ const EventList = () => {
         const fetchData = async () => {
             try {
                 const response2 = await fetch(
-                    `http://127.0.0.1:8000/events/?${filters}&format=json`
+                    `http://127.0.0.1:8000/events/?${filters}&format=json`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data2 = await response2.json();
                 setAllEvents(data2);
                 const response = await fetch(
-                    `http://127.0.0.1:8000/events/?page=${currentPage - 1}&${filters}&format=json`
+                    `http://127.0.0.1:8000/events/?page=${currentPage - 1}&${filters}&format=json`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data = await response.json();
                 setEvents(data);
@@ -100,12 +134,28 @@ const EventList = () => {
         const fetchData = async () => {
             try {
                 const response2 = await fetch(
-                    `http://127.0.0.1:8000/events/?${filters}&format=json`
+                    `http://127.0.0.1:8000/events/?${filters}&format=json`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data2 = await response2.json();
                 setAllEvents(data2);
                 const response = await fetch(
-                    `http://127.0.0.1:8000/events/?page=${currentPage + 1}&${filters}&format=json`
+                    `http://127.0.0.1:8000/events/?page=${currentPage + 1}&${filters}&format=json`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data = await response.json();
                 setEvents(data);

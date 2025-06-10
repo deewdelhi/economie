@@ -1,7 +1,7 @@
 import { useState, useEffect, CSSProperties } from "react";
 import { Preference } from "../../models/Preference";
 
-import { getUserID } from "../../util/auth";
+import {getAuthToken, getUserID} from "../../util/auth";
 import {prototypejs} from "globals";
 import {Skill} from "../../models/Skill.ts";
 import Popup from "./PopUp.tsx";
@@ -29,12 +29,28 @@ const EventDetailsForm = (props: { eventDetail: any }) => {
         const fetchData = async () => {
             try {
                 const response = await fetch(
-                    "http://127.0.0.1:8000/preferences/?format=json"
+                    "http://127.0.0.1:8000/preferences/?format=json",
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data = await response.json();
                 setPreferences(data);
                 const response2 = await fetch(
-                    "http://127.0.0.1:8000/skills/?format=json"
+                    "http://127.0.0.1:8000/skills/?format=json",
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
                 );
                 const data2 = await response2.json();
                 setSkills(data2);
