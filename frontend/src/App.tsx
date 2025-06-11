@@ -45,6 +45,8 @@ import Login from "./components/LoginSignUpComponents/Login";
 import SignUp from "./components/LoginSignUpComponents/SignUp";
 import ShowAllEvents from "./components/EventsComponent/showAllEvents.tsx";
 import Logout from "./components/LoginSignUpComponents/Logout.tsx";
+import UserProfile from "./components/UserComponents/userDetailView.tsx";
+import UserUpdate from "./components/UserComponents/userUpdateData.tsx";
 // import Logout from "./components/LoginSignUpComponents/Logout";
 
 // import UserRecipeList from "./components/RecipeComponents/userRecipes";
@@ -86,18 +88,20 @@ function App() {
             <SignUp setLoggedIn={setLoggedIn} setEmail={setEmail} />
           }
         />
-
+        <Route path="/userDetail" element={<UserProfile></UserProfile>} />
+        <Route path="/userUpdate" element={<UserUpdate />} />
         <Route
-                    path="/showlist/*"
-                    element={<ShowAllEvents></ShowAllEvents>}
-                />
-                <Route path="/logout" element={<Logout></Logout>} />
+          path="/showlist/*"
+          element={<ShowAllEvents></ShowAllEvents>}
+        />
+        <Route path="/logout" element={<Logout></Logout>} />
 
-                {/*<Route*/}
 
-                {/*    path="/userRecipes/*"*/}
-                {/*    element={<UserRecipeList ></UserRecipeList>}*/}
-                {/*/> */}
+        {/*<Route*/}
+
+        {/*    path="/userRecipes/*"*/}
+        {/*    element={<UserRecipeList ></UserRecipeList>}*/}
+        {/*/> */}
       </Routes>
     </div>
   );
