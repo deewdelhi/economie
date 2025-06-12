@@ -1,99 +1,80 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { User } from "../../models/User";
 import { Skill } from "../../models/Skill";
 import { Preference } from "../../models/Preference";
-import { getUserID } from "../../util/auth";
-import { useNavigate } from "react-router-dom";
+import { getAuthToken, getUserID } from "../../util/auth";
+
+const overlayColor = "rgba(121, 156, 178, 0.8)"; // Combined color
 
 const UserUpdate = () => {
-    // User state
     const [user, setUser] = useState<User | null>(null);
-
-    // All available skills/preferences
     const [allSkills, setAllSkills] = useState<Skill[]>([]);
     const [allPreferences, setAllPreferences] = useState<Preference[]>([]);
-
-    // Selected skills and preferences by ID
     const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
     const [selectedPreferenceIds, setSelectedPreferenceIds] = useState<number[]>([]);
-
-    // Popup visibility states
     const [showSkillsPopup, setShowSkillsPopup] = useState(false);
     const [showPreferencesPopup, setShowPreferencesPopup] = useState(false);
-
-    // Editable user fields
     const [username, setUsername] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [description, setDescription] = useState("");
 
+    const navigate = useNavigate();
+
     useEffect(() => {
-        const fetchSkills = async () => {
-            const res = await fetch("http://127.0.0.1:8000/skills");
-            const data: Skill[] = await res.json();
-            setAllSkills(data);
-            return data;
+        const fetchData = async () => {
+            try {
+                const [skillsRes, prefsRes] = await Promise.all([
+                    fetch("http://127.0.0.1:8000/skills", {
+                        headers: {
+                            Authorization: `token ${getAuthToken()}`,
+                            "Content-Type": "application/json",
+                        },
+                    }),
+                    fetch("http://127.0.0.1:8000/preferences", {
+                        headers: {
+                            Authorization: `token ${getAuthToken()}`,
+                            "Content-Type": "application/json",
+                        },
+                    }),
+                ]);
+
+                const [skills, preferences] = await Promise.all([
+                    skillsRes.json(),
+                    prefsRes.json(),
+                ]);
+
+                setAllSkills(skills);
+                setAllPreferences(preferences);
+
+                const userId = getUserID();
+                const userRes = await fetch(`http://127.0.0.1:8000/users/${userId}`, {
+                    headers: {
+                        Authorization: `token ${getAuthToken()}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const userData: User = await userRes.json();
+                setUser(userData);
+                setUsername(userData.username);
+                setFirstName(userData.first_name);
+                setLastName(userData.last_name);
+                setDescription(userData.description);
+                setSelectedSkillIds(userData.skills.map(Number));
+                setSelectedPreferenceIds(userData.preferences.map(Number));
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
         };
 
-        const fetchPreferences = async () => {
-            const res = await fetch("http://127.0.0.1:8000/preferences");
-            const data: Preference[] = await res.json();
-            setAllPreferences(data);
-            return data;
-        };
-
-        const fetchUser = async (skillsList: Skill[], preferencesList: Preference[]) => {
-            const userId = getUserID();
-            const res = await fetch(`http://127.0.0.1:8000/users/${userId}`);
-            const data: User = await res.json();
-
-            setUser(data);
-            setUsername(data.username);
-            setFirstName(data.first_name);
-            setLastName(data.last_name);
-            setDescription(data.description);
-
-            const userSkillIds = data.skills
-                .map((skillName: string) => {
-                    const found = skillsList.find(s => s.name === skillName);
-                    return found ? found.id! : undefined;
-                })
-                .filter((id): id is number => id !== undefined);
-
-            setSelectedSkillIds(userSkillIds);
-
-            const userPreferenceIds = data.preferences
-                .map((prefName: string) => {
-                    const found = preferencesList.find(p => p.name === prefName);
-                    return found ? found.id! : undefined;
-                })
-                .filter((id): id is number => id !== undefined);
-
-            setSelectedPreferenceIds(userPreferenceIds);
-        };
-
-        Promise.all([fetchSkills(), fetchPreferences()])
-            .then(([skillsList, preferencesList]) => {
-                fetchUser(skillsList, preferencesList);
-            })
-            .catch(error => {
-                console.error("Error fetching data:", error);
-            });
+        fetchData();
     }, []);
 
-    const toggleSkill = (id: number) => {
-        setSelectedSkillIds((prev) =>
-            prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
-        );
+    const toggleItem = (id: number, list: number[], setter: (ids: number[]) => void) => {
+        setter(list.includes(id) ? list.filter(i => i !== id) : [...list, id]);
     };
-
-    const togglePreference = (id: number) => {
-        setSelectedPreferenceIds((prev) =>
-            prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
-        );
-    };
-    // Inside your component
-    const navigate = useNavigate();
 
     const handleSave = async () => {
         const updatedUserData = {
@@ -107,175 +88,353 @@ const UserUpdate = () => {
 
         try {
             const userId = getUserID();
-            if (!userId) {
-                console.error("User ID not found");
-                return;
-            }
-
             const response = await fetch(`http://127.0.0.1:8000/users/${userId}/`, {
                 method: "PATCH",
                 headers: {
+                    Authorization: `token ${getAuthToken()}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(updatedUserData),
             });
 
-            if (!response.ok) {
-                throw new Error("Failed to update user");
-            }
+            if (!response.ok) throw new Error("Failed to update user");
 
-            const data = await response.json();
-            console.log("User updated successfully", data);
-
-            // Navigate to user profile page after success
-            navigate("/userDetail");  // Change this path to your actual user data view route
-
+            navigate("/userDetail");
         } catch (error) {
             console.error("Error updating user:", error);
         }
     };
 
-    if (!user) return <div>Loading user data...</div>;
+    if (!user) return <div style={{ textAlign: "center", marginTop: 40 }}>Loading user data...</div>;
 
     return (
-        <div className="max-w-md mx-auto p-4 bg-white border rounded shadow">
-            <h2 className="text-2xl font-bold mb-4">Update User Profile</h2>
+        <div
+            style={{
+                maxWidth: 450,
+                margin: "2rem auto",
+                padding: "2rem",
+                backgroundColor: "#fff",
+                borderRadius: 12,
+                boxShadow: "0 0 15px rgba(121, 156, 178, 0.3)",
+                fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+            }}
+        >
+            <h2 style={{ textAlign: "center", color: "rgba(121, 156, 178, 1)", marginBottom: 24 }}>
+                Update User Profile
+            </h2>
 
-            <label className="block mb-4">
-                Username:<br />
-                <input
-                    type="text"
-                    className="border p-1 w-full"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-            </label>
+            {[
+                { label: "Username", value: username, onChange: setUsername },
+                { label: "First Name", value: firstName, onChange: setFirstName },
+                { label: "Last Name", value: lastName, onChange: setLastName },
+            ].map(({ label, value, onChange }) => (
+                <label
+                    key={label}
+                    style={{
+                        display: "block",
+                        marginBottom: 16,
+                        fontWeight: 600,
+                        color: "rgba(107, 107, 107, 0.9)",
+                    }}
+                >
+                    {label}:
+                    <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        style={{
+                            display: "block",
+                            width: "100%",
+                            marginTop: 6,
+                            padding: "8px 12px",
+                            borderRadius: 6,
+                            border: `1.5px solid rgba(121, 156, 178, 0.8)`,
+                            fontSize: 16,
+                            color: "#fff",
+                            transition: "border-color 0.3s ease",
+                        }}
+                        onFocus={(e) => (e.target.style.borderColor = overlayColor)}
+                        onBlur={(e) => (e.target.style.borderColor = `rgba(121, 156, 178, 0.8)`)}
+                    />
+                </label>
+            ))}
 
-            <label className="block mb-4">
-                First Name:<br />
-                <input
-                    type="text"
-                    className="border p-1 w-full"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                />
-            </label>
-
-            <label className="block mb-4">
-                Last Name:<br />
-                <input
-                    type="text"
-                    className="border p-1 w-full"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                />
-            </label>
-
-            <label className="block mb-4">
-                Description:<br />
+            <label
+                style={{
+                    display: "block",
+                    marginBottom: 20,
+                    fontWeight: 600,
+                    color: "rgba(107, 107, 107, 0.9)",
+                }}
+            >
+                Description:
                 <textarea
-                    className="border p-1 w-full"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    rows={4}
+                    style={{
+                        display: "block",
+                        width: "100%",
+                        marginTop: 6,
+                        padding: "10px 12px",
+                        borderRadius: 6,
+                        border: `1.5px solid rgba(121, 156, 178, 0.8)`,
+                        fontSize: 16,
+                        resize: "vertical",
+                        color: "#fff",
+                        transition: "border-color 0.3s ease",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = overlayColor)}
+                    onBlur={(e) => (e.target.style.borderColor = `rgba(121, 156, 178, 0.8)`)}
                 />
             </label>
 
-            <div className="mb-4">
-                <strong>Skills:</strong>{" "}
-                {selectedSkillIds.length > 0
-                    ? allSkills
-                        .filter((skill) => selectedSkillIds.includes(skill.id))
-                        .map((skill) => skill.name)
-                        .join(", ")
-                    : "No skills selected"}
+            <div style={{ marginBottom: 20 }}>
+                <strong style={{ color: "rgba(121, 156, 178, 1)" }}>Skills:</strong>{" "}
+                <span style={{ color: "rgba(50,50,50,0.85)" }}>
+                    {selectedSkillIds.length > 0
+                        ? allSkills
+                            .filter((skill) => selectedSkillIds.includes(skill.id))
+                            .map((skill) => skill.name)
+                            .join(", ")
+                        : "No skills selected"}
+                </span>
                 <button
                     onClick={() => setShowSkillsPopup(true)}
-                    className="ml-2 px-2 py-1 bg-blue-500 text-white rounded"
+                    style={{
+                        marginLeft: 12,
+                        padding: "6px 14px",
+                        borderRadius: 8,
+                        border: "none",
+                        backgroundColor: overlayColor,
+                        color: "#fff",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 6px rgba(121, 156, 178, 0.4)",
+                        transition: "background-color 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(121,156,178,1)")}
+                    onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = overlayColor)}
                 >
                     Edit Skills
                 </button>
             </div>
 
-            <div className="mb-4">
-                <strong>Preferences:</strong>{" "}
-                {selectedPreferenceIds.length > 0
-                    ? allPreferences
-                        .filter((pref) => selectedPreferenceIds.includes(pref.id))
-                        .map((pref) => pref.name)
-                        .join(", ")
-                    : "No preferences selected"}
+            <div style={{ marginBottom: 30 }}>
+                <strong style={{ color: "rgba(121, 156, 178, 1)" }}>Preferences:</strong>{" "}
+                <span style={{ color: "rgba(50,50,50,0.85)" }}>
+                    {selectedPreferenceIds.length > 0
+                        ? allPreferences
+                            .filter((pref) => selectedPreferenceIds.includes(pref.id))
+                            .map((pref) => pref.name)
+                            .join(", ")
+                        : "No preferences selected"}
+                </span>
                 <button
                     onClick={() => setShowPreferencesPopup(true)}
-                    className="ml-2 px-2 py-1 bg-blue-500 text-white rounded"
+                    style={{
+                        marginLeft: 12,
+                        padding: "6px 14px",
+                        borderRadius: 8,
+                        border: "none",
+                        backgroundColor: overlayColor,
+                        color: "#fff",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 6px rgba(121, 156, 178, 0.4)",
+                        transition: "background-color 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(121,156,178,1)")}
+                    onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = overlayColor)}
                 >
                     Edit Preferences
                 </button>
             </div>
 
-            {/* Skills popup */}
-            {showSkillsPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded max-w-sm w-full">
-                        <h3 className="text-lg font-semibold mb-4">Select Skills</h3>
-                        <div className="max-h-60 overflow-auto">
-                            {allSkills.map((skill) => (
-                                <label key={skill.id} className="block mb-1">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedSkillIds.includes(skill.id)}
-                                        onChange={() => toggleSkill(skill.id)}
-                                        className="mr-2"
-                                    />
-                                    {skill.name}
-                                </label>
-                            ))}
-                        </div>
-                        <button
-                            onClick={() => setShowSkillsPopup(false)}
-                            className="mt-4 px-4 py-2 bg-gray-300 rounded"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Preferences popup */}
-            {showPreferencesPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded max-w-sm w-full">
-                        <h3 className="text-lg font-semibold mb-4">Select Preferences</h3>
-                        <div className="max-h-60 overflow-auto">
-                            {allPreferences.map((pref) => (
-                                <label key={pref.id} className="block mb-1">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedPreferenceIds.includes(pref.id)}
-                                        onChange={() => togglePreference(pref.id)}
-                                        className="mr-2"
-                                    />
-                                    {pref.name}
-                                </label>
-                            ))}
-                        </div>
-                        <button
-                            onClick={() => setShowPreferencesPopup(false)}
-                            className="mt-4 px-4 py-2 bg-gray-300 rounded"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
-
             <button
                 onClick={handleSave}
-                className="mt-6 w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                style={{
+                    width: "100%",
+                    padding: "12px 0",
+                    borderRadius: 10,
+                    border: "none",
+                    backgroundColor: overlayColor,
+                    color: "white",
+                    fontSize: 18,
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    boxShadow: "0 5px 10px rgba(121, 156, 178, 0.6)",
+                    transition: "background-color 0.3s ease",
+                }}
+                onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(121,156,178,1)")}
+                onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = overlayColor)}
             >
                 Save Changes
             </button>
+
+            {/* Skills Popup */}
+            {showSkillsPopup && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        backgroundColor: overlayColor,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: "#fff",
+                            padding: "20px",
+                            borderRadius: 12,
+                            width: 320,
+                            maxHeight: "70vh",
+                            overflowY: "auto",
+                            boxShadow: "0 0 20px rgba(121,156,178,0.7)",
+                        }}
+                    >
+                        <h3
+                            style={{
+                                marginBottom: 20,
+                                color: "rgba(121, 156, 178, 1)",
+                                fontWeight: "700",
+                                textAlign: "center",
+                            }}
+                        >
+                            Select Skills
+                        </h3>
+
+                        {allSkills.map((skill) => (
+                            <label
+                                key={skill.id}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    marginBottom: 12,
+                                    fontSize: 16,
+                                    color: "rgba(50,50,50,0.9)",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={selectedSkillIds.includes(skill.id)}
+                                    onChange={() => toggleItem(skill.id, selectedSkillIds, setSelectedSkillIds)}
+                                    style={{ marginRight: 10, width: 18, height: 18 }}
+                                />
+                                {skill.name}
+                            </label>
+                        ))}
+
+                        <button
+                            onClick={() => setShowSkillsPopup(false)}
+                            style={{
+                                marginTop: 16,
+                                width: "100%",
+                                padding: "10px",
+                                borderRadius: 10,
+                                border: "none",
+                                backgroundColor: "rgba(107, 107, 107, 0.8)",
+                                color: "#fff",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                transition: "background-color 0.3s ease",
+                            }}
+                            onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(90,90,90,0.9)")}
+                            onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(107, 107, 107, 0.8)")}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Preferences Popup */}
+            {showPreferencesPopup && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        backgroundColor: overlayColor,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: "#fff",
+                            padding: "20px",
+                            borderRadius: 12,
+                            width: 320,
+                            maxHeight: "70vh",
+                            overflowY: "auto",
+                            boxShadow: "0 0 20px rgba(121,156,178,0.7)",
+                        }}
+                    >
+                        <h3
+                            style={{
+                                marginBottom: 20,
+                                color: "rgba(121, 156, 178, 1)",
+                                fontWeight: "700",
+                                textAlign: "center",
+                            }}
+                        >
+                            Select Preferences
+                        </h3>
+
+                        {allPreferences.map((pref) => (
+                            <label
+                                key={pref.id}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    marginBottom: 12,
+                                    fontSize: 16,
+                                    color: "rgba(50,50,50,0.9)",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={selectedPreferenceIds.includes(pref.id)}
+                                    onChange={() =>
+                                        toggleItem(pref.id, selectedPreferenceIds, setSelectedPreferenceIds)
+                                    }
+                                    style={{ marginRight: 10, width: 18, height: 18 }}
+                                />
+                                {pref.name}
+                            </label>
+                        ))}
+
+                        <button
+                            onClick={() => setShowPreferencesPopup(false)}
+                            style={{
+                                marginTop: 16,
+                                width: "100%",
+                                padding: "10px",
+                                borderRadius: 10,
+                                border: "none",
+                                backgroundColor: "rgba(107, 107, 107, 0.8)",
+                                color: "#fff",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                transition: "background-color 0.3s ease",
+                            }}
+                            onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(90,90,90,0.9)")}
+                            onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = "rgba(107, 107, 107, 0.8)")}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
-export default UserUpdate
+export default UserUpdate;

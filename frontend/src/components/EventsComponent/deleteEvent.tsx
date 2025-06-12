@@ -9,9 +9,13 @@ const DeleteEvent = (props: { eventToDelete: any }) => {
         event.preventDefault();
         console.log(" about to delete this");
         console.log(props.eventToDelete.id);
+        // Delay navigation by 2 seconds
+        setTimeout(() => {
+
+        }, 10000);
         // const [shouldShow, setShouldShow] = useState<number>(1);
 
-        fetch(`http://127.0.0.1:8000/events/${props.eventToDelete.id}`, {
+        fetch(`http://127.0.0.1:8000/events/${props.eventToDelete.id}/`, {
             method: "DELETE",
             headers: {
                 'Authorization': `token ${getAuthToken()}`, // if you're using token auth
@@ -25,6 +29,10 @@ const DeleteEvent = (props: { eventToDelete: any }) => {
             .then((data) => {
                 console.log(data);
             });
+        // Delay navigation by 2 seconds
+        setTimeout(() => {
+
+        }, 10000);
         setTimeout(() => {
             const isUserEventPage =
                 window.location.href.includes("/userEvents");
