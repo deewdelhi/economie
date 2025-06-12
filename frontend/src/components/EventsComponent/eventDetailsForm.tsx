@@ -40,6 +40,8 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
                     }
                 );
                 const data = await response.json();
+                console.log("0000000000000000000000000000000000");
+                console.log(data);
                 setPreferences(data);
                 const response2 = await fetch(
                     "http://127.0.0.1:8000/skills/?format=json",
@@ -309,7 +311,7 @@ const styles: { [key: string]: CSSProperties } = {
         alignItems: "center",
         justifyContent: "center",
         color: "black",
-        background: "rgba(236, 183, 83, 0.8)", // Adjust the alpha value to control transparencyyyy
+        background: "rgba(107, 107, 107, 0.8)", // Adjust the alpha value to control transparencyyyy
     },
     modal: {
         background: "white",
@@ -359,7 +361,7 @@ const styles: { [key: string]: CSSProperties } = {
         color: "white",
     },
     inputButton: {
-        backgroundColor: "#ecb753", // Dark yellow button color
+        backgroundColor: "rgba(135, 206, 250,0.8)", // Dark yellow button color
         color: "#333333", // Dark gray text color
         padding: "10px",
         fontSize: "16px",

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import { Preference } from "../../models/Preference";
 import { Skill } from "../../models/Skill";
-import {getAuthToken, getUserID} from "../../util/auth";
+import { getAuthToken, getUserID } from "../../util/auth";
 
 const AddEventForm = () => {
     const [preferences, setPreferences] = useState<Preference[]>([]);
@@ -26,20 +26,23 @@ const AddEventForm = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [prefRes, skillRes] = await Promise.all([
-                    fetch("http://127.0.0.1:8000/preferences/?format=json"),
-                    fetch("http://127.0.0.1:8000/skills/?format=json"),
-                    {
-                        method: 'GET',
+                const [skillsRes, prefsRes] = await Promise.all([
+                    fetch("http://127.0.0.1:8000/skills", {
                         headers: {
-                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
-                            // Add any other custom headers here
-                        }
-                    }
+                            Authorization: `token ${getAuthToken()}`,
+                            "Content-Type": "application/json",
+                        },
+                    }),
+                    fetch("http://127.0.0.1:8000/preferences", {
+                        headers: {
+                            Authorization: `token ${getAuthToken()}`,
+                            "Content-Type": "application/json",
+                        },
+                    }),
                 ]);
-                const prefData = await prefRes.json();
-                const skillData = await skillRes.json();
+
+                const prefData = await prefsRes.json();
+                const skillData = await skillsRes.json();
                 setPreferences(prefData);
                 setSkills(skillData);
             } catch {
@@ -114,7 +117,7 @@ const AddEventForm = () => {
     return (
         <div style={styles.overlay}>
             <div style={styles.modal}>
-                <h2>Add New Event</h2>
+                <h2 style={styles.heading}>Add New Event</h2>
                 <form onSubmit={addEvent} style={styles.form}>
                     <label style={styles.label}>
                         Name:
@@ -133,7 +136,7 @@ const AddEventForm = () => {
                             value={eventData.description}
                             onChange={handleEventDataChange}
                             rows={4}
-                            style={styles.inputBoxDesc}
+                            style={styles.textarea}
                         />
                     </label>
                     <label style={styles.label}>
@@ -209,14 +212,11 @@ const AddEventForm = () => {
                         ))}
                     </div>
 
-                    <div id="buttons-container">
-                        {error && <div style={styles.error}>{error}</div>}
-                        <button type="submit" style={styles.button} disabled={!!error}>
-                            Submit
-                        </button>
-                        <button type="button" style={styles.button} onClick={handleCancel}>
-                            Cancel
-                        </button>
+                    {error && <div style={styles.error}>{error}</div>}
+
+                    <div style={styles.buttonGroup}>
+                        <button type="submit" style={styles.button}>Submit</button>
+                        <button type="button" style={styles.button} onClick={handleCancel}>Cancel</button>
                     </div>
                 </form>
             </div>
@@ -224,7 +224,6 @@ const AddEventForm = () => {
     );
 };
 
-// STYLES
 const styles: { [key: string]: CSSProperties } = {
     overlay: {
         position: "fixed",
@@ -232,69 +231,57 @@ const styles: { [key: string]: CSSProperties } = {
         left: 0,
         width: "100%",
         height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        backgroundColor: "rgba(0,0,0,0.85)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        zIndex: 999,
     },
     modal: {
-        background: "#ecb753",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
-        textAlign: "center",
-        color: "black",
+        backgroundColor: "rgb(100, 100, 100)",
+        padding: "30px",
+        borderRadius: "12px",
+        width: "90%",
+        maxWidth: "600px",
+        maxHeight: "90vh",
         overflowY: "auto",
-        maxHeight: "60vh",
+        color: "#fff",
+        boxShadow: "0 0 15px rgba(0,0,0,0.4)",
+    },
+    heading: {
+        marginBottom: "20px",
+        fontSize: "22px",
     },
     form: {
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        gap: "15px",
     },
     label: {
-        marginBottom: 10,
-        textAlign: "left",
-        color: "black",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-    },
-    button: {
-        padding: "10px",
-        marginTop: "10px",
-        backgroundColor: "white",
-        color: "black",
-        marginRight: "20px",
-        marginLeft: "20px",
+        width: "100%",
+        fontSize: "14px",
+        fontWeight: 500,
     },
     inputBox: {
-        height: "30px",
-        width: "300px",
-        backgroundColor: "#f0f0f0",
-        border: "1px solid #ccc",
-        borderRadius: "3px",
+        width: "100%",
+        height: "35px",
+        backgroundColor: "#2b2b2b",
+        border: "1px solid #444",
+        borderRadius: "6px",
         padding: "0 10px",
+        color: "#fff",
         fontSize: "14px",
-        fontWeight: "300",
-        color: "#333333",
-        outline: "none",
+        marginTop: "6px",
     },
-    inputBoxDesc: {
-        width: "300px",
-        backgroundColor: "#f0f0f0",
-        border: "1px solid #ccc",
-        borderRadius: "3px",
-        padding: "0 10px",
+    textarea: {
+        width: "100%",
+        backgroundColor: "#2b2b2b",
+        border: "1px solid #444",
+        borderRadius: "6px",
+        padding: "10px",
+        color: "#fff",
         fontSize: "14px",
-        fontWeight: "300",
-        color: "#333333",
-        outline: "none",
-        resize: "vertical",
-    },
-    error: {
-        color: "red",
-        margin: "10px 0",
+        marginTop: "6px",
     },
     bubbleContainer: {
         display: "flex",
@@ -303,14 +290,19 @@ const styles: { [key: string]: CSSProperties } = {
         marginBottom: "10px",
     },
     bubble: {
-        padding: "5px 10px",
-        backgroundColor: "#f0f0f0",
-        borderRadius: "15px",
+        padding: "6px 12px",
+        backgroundColor: "#2b2b2b",
+        borderRadius: "20px",
         cursor: "pointer",
+        border: "1px solid #555",
+        color: "#f0f0f0",
+        transition: "background-color 0.2s ease",
+        fontSize: "13px",
     },
     bubbleSelected: {
-        backgroundColor: "#f56c6c",
+        backgroundColor: "rgba(121, 156, 178, 1)",
         color: "white",
+
     },
 };
 
