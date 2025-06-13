@@ -1,6 +1,6 @@
 import { CSSProperties, useState } from "react";
 import { getAuthToken } from "../../util/auth";
-import EventDetailsForm from "./eventDetailsForm";
+import EventDetailsForm from "./eventDetailsForm.tsx";
 
 const DeleteEvent = (props: { eventToDelete: any }) => {
     const [shouldShow, setShouldShow] = useState<number>(1);

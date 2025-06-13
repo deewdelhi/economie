@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserID } from "../../util/auth";
 import { User } from "../../models/User";
 import { Event } from "../../models/Event";
-import EventDetailsForm from "../EventsComponent/eventDetailsForm"; // adjust path
+import EventDetailsForm from "../EventsComponent/eventDetailsForm.tsx"; // adjust path
 import { getAuthToken } from "../../util/auth";
 
 const UserProfile: React.FC = () => {

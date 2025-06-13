@@ -1,19 +1,22 @@
-import { useState, useEffect, CSSProperties } from "react";
-import { Preference } from "../../models/Preference";
+import {useState, useEffect, CSSProperties} from "react";
+import {Preference} from "../../models/Preference";
 
-import { getAuthToken, getUserID } from "../../util/auth";
-import { prototypejs } from "globals";
-import { Skill } from "../../models/Skill.ts";
+import {getAuthToken, getUserID} from "../../util/auth";
+import {Skill} from "../../models/Skill.ts";
 import Popup from "./PopUp.tsx";
 import DeleteEvent from "./deleteEvent.tsx";
 import UpdateEventForm from "./updateEventForm.tsx";
+import {useLocation, useParams} from "react-router-dom";
 
 
-const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
+const EventDetailsForm = () => {
     const [preferences, setPreferences] = useState<Preference[]>([]);
     const [skills, setSkills] = useState<Skill[]>([]);
     const [desiredCommand, setDesiredCommand] = useState(-1);
     const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
+
+    const { state: event } = useLocation();
+
 
     const openDeletePopup = () => {
         setDeletePopupOpen(true);
@@ -65,11 +68,11 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
     const currentPreferencesSet = new Set();
     const currentSkillsSet = new Set();
     console.log("---------------------------");
-    console.log(props.eventDetail.preferences);
+    console.log(event);
     console.log("---------------------------");
-    console.log(props.eventDetail.skills);
+    // console.log(event.skills);
 
-    props.eventDetail.preferences.forEach((item: number) => {
+    event.preferences.forEach((item: number) => {
 
         if (preferences && preferences[item - 1] && preferences[item - 1].name) {
             currentPreferencesSet.add(preferences[item - 1].name);
@@ -80,7 +83,7 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
         }
     });
 
-    props.eventDetail.skills.forEach((item: number) => {
+    event.skills.forEach((item: number) => {
         if (skills && skills[item - 1] && skills[item - 1].name) {
             currentSkillsSet.add(skills[item - 1].name);
         } else {
@@ -97,24 +100,24 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
 
     useEffect(() => {
         setFormData({
-            name: props.eventDetail.name,
-            description: props.eventDetail.description,
-            starting_date: props.eventDetail.starting_date,
-            ending_date: props.eventDetail.ending_date,
-            creator: props.eventDetail.creator,
-            capacity: props.eventDetail.capacity,
-            location: props.eventDetail.location,
-            preferences: props.eventDetail.preferences,
-            skills: props.eventDetail.skills
+            name: event.name,
+            description: event.description,
+            starting_date: event.starting_date,
+            ending_date: event.ending_date,
+            creator: event.creator,
+            capacity: event.capacity,
+            location: event.location,
+            preferences: event.preferences,
+            skills: event.skills
         });
-        console.log(props.eventDetail?.photo);
+        // console.log(event?.photo);
         console.log("cvbhnjkl;");
-    }, [props.eventDetail]);
+    }, [event]);
 
     useEffect(() => {
         const eventPreferences = preferences.filter(
             (preference) =>
-                props.eventDetail.preferences.indexOf(preference.id) > -1
+                event.preferences.indexOf(preference.id) > -1
         );
         setPreferenceNames([]);
         eventPreferences.forEach((preference) =>
@@ -128,7 +131,7 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
     useEffect(() => {
         const eventSkills = skills.filter(
             (skill) =>
-                props.eventDetail.skills.indexOf(skill.id) > -1
+                event.skills.indexOf(skill.id) > -1
         );
         setSkillNames([]);
         eventSkills.forEach((skill) =>
@@ -180,7 +183,7 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
                     </button>
                 </div>
 
-                <h1>{props.eventDetail.name}</h1>
+                <h1>{event.name}</h1>
                 {/* {formData.photo && (
                     <div>
                         <img src={formData.photo} alt="My Image" />
@@ -252,11 +255,11 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
 
                 </div>
                 <div style={styles.descriptionContainer}>
-                    {props.eventDetail.description}
+                    {event.description}
                 </div>
 
                 <div id="buttons-container">
-                    {props.eventDetail.creator == getUserID() && (
+                    {event.creator == getUserID() && (
                         <div>
                             {" "}
                             <td>
@@ -289,11 +292,11 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
                             isOpen={isDeletePopupOpen}
                             onClose={closeDeletePopup}
                         >
-                            <DeleteEvent eventToDelete={props.eventDetail} />
+                            <DeleteEvent eventToDelete={event}/>
                         </Popup>
                     )}
                     {desiredCommand === 1 && (
-                        <UpdateEventForm eventToUpdate={props.eventDetail} />
+                        <UpdateEventForm eventToUpdate={event}/>
                     )}
 
                 </div>

@@ -1,11 +1,11 @@
-import { Event } from "../../models/Event";
-import React, { useState, useEffect, CSSProperties } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import {Event} from "../../models/Event";
+import React, {useState, useEffect, CSSProperties} from "react";
+import {Link, Route, Routes, useNavigate} from "react-router-dom";
 import EventDetailsForm from "./eventDetailsForm.tsx";
 import AddEventForm from "./addEventForm.tsx";
-import { FaSearch } from "react-icons/fa";
-import { VscAccount } from "react-icons/vsc";
-import { getAuthToken } from "../../util/auth.tsx";
+import {FaSearch} from "react-icons/fa";
+import {VscAccount} from "react-icons/vsc";
+import {getAuthToken, getUserID} from "../../util/auth.tsx";
 
 const EventList = () => {
     const [events, setEvents] = useState<Event[]>([]);
@@ -25,6 +25,10 @@ const EventList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [showUserMenu, setShowUserMenu] = useState(false);
     let [filters, setFilters] = useState("");
+
+    const [viewOption, setViewOption] = useState<"matching" | "all">("matching");
+    const [searchTerm, setSearchTerm] = useState("");
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -66,6 +70,25 @@ const EventList = () => {
         fetchData();
     }, [filters, currentPage]); // 👈 now it listens for filter and page changes
 
+    const [skillEventList, setSkillEventList] = useState([]);
+
+    useEffect(() => {
+        const fetchSkillEvents = async () => {
+            const response = await fetch(`http://127.0.0.1:8000/skills/user/${getUserID()}/`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${getAuthToken()}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            console.log(data)
+            setSkillEventList(data);
+            console.log(skillEventList)
+        };
+
+        fetchSkillEvents();
+    }, []);
 
     const handleClickPrev = () => {
         setCurrentPage(currentPage - 1);
@@ -185,17 +208,43 @@ const EventList = () => {
                         onChange={handleSearchChange}
                         style={styles.searchInput}
                     />
+                    <button
+                        onClick={() => setViewOption("matching")}
+                        style={{
+                            padding: "8px 12px",
+                            backgroundColor: viewOption === "matching" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
+                            border: "1px solid #ccc",
+                            borderRadius: "14px",
+                            cursor: "pointer",
+                        }}
+                    >
+                        Matching Events
+                    </button>
+                    <button
+                        onClick={() => setViewOption("all")}
+                        style={{
+                            padding: "8px 12px",
+                            backgroundColor: viewOption === "all" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
+                            border: "0px solid #ccc",
+                            borderRadius: "14px",
+                            cursor: "pointer",
+                            marginLeft: "20px"
+                        }}
+                    >
+                        All Events
+                    </button>
+
                 </form>
                 <button style={styles.searchIconButton} onClick={() => {
                     setShowFilterModalName(true);
                 }}>
-                    <FaSearch />
+                    <FaSearch/>
                 </button>
             </div>
 
             <div style={styles.userIconWrapper}>
                 <button style={styles.userIconButton} onClick={() => setShowUserMenu((prev) => !prev)}>
-                    <VscAccount />
+                    <VscAccount/>
                 </button>
                 {showUserMenu && (
                     <div style={styles.userMenu}>
@@ -212,10 +261,62 @@ const EventList = () => {
                 )}
             </div>
 
-            {/* Add a Link to the new form component */}
-            <Link to="showlist/add-event">
-                <button style={styles.inputButton}>Add New Event</button>
-            </Link>
+            {viewOption === "matching" ? (
+                <div style={{marginTop: "20px"}}>
+                    <h2 style={{fontSize: "24px", marginBottom: "10px"}}>Your Skills & Matching Events</h2>
+                    {skillEventList.map((entry: any) => {
+                        if (!entry || !entry.skill) {
+                            return null; // skip if missing skill info
+                        }
+                        return (
+                            <div key={entry.skill.id} style={{marginBottom: "30px"}}>
+                                <h3 style={{fontSize: "20px", color: "rgba(121, 156, 178, 1)"}}>{entry.skill.name}</h3>
+                                {entry.events && entry.events.length > 0 ? (
+                                    <ul style={{paddingLeft: "20px"}}>
+                                        {entry.events.map((event: Event) => (
+                                            <li key={event.id}>
+                                                <span
+                                                    style={{fontWeight: "bold"}}>{event.name}</span> – {event.location} on{" "}
+                                                {new Date(event.starting_date).toLocaleDateString()}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p style={{fontStyle: "italic"}}>No events available for this skill.</p>
+                                )}
+                            </div>
+                        );
+                    })}
+
+                </div>
+            ) : (
+                <div style={styles.eventsContainer}>
+                    {events.map((event, index) => (
+                        <div
+                            key={event.id}
+                            style={{
+                                ...styles.listItem,
+                                ...(index % 2 === 0 ? styles.evenItem : styles.oddItem),
+                            }}
+                        >
+                            <div className="title" style={{marginBottom: "10px"}}>
+                                {event.name}
+                            </div>
+
+                            <button
+                                style={{
+                                    ...styles.button,
+                                    ...(index % 2 === 0 ? styles.whiteButton : styles.yellowButton),
+                                }}
+                                onClick={() => navigate(`/events/${event.id}`, { state: event })}
+                            >
+                                View Details
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
 
             {isAnyFilterModalOpen && (
                 <div style={styles.modalOverlay}>
@@ -271,7 +372,7 @@ const EventList = () => {
                             />
                         </label>
 
-                        <div style={{ marginTop: '10px' }}>
+                        <div style={{marginTop: '10px'}}>
                             <button
                                 style={styles.inputButton}
                                 onClick={() => {
@@ -282,7 +383,7 @@ const EventList = () => {
                                 Apply Filters
                             </button>
                             <button
-                                style={{ ...styles.inputButton, marginLeft: '10px' }}
+                                style={{...styles.inputButton, marginLeft: '10px'}}
                                 onClick={() => setShowFilterModalName(false)}
                             >
                                 Cancel
@@ -308,38 +409,6 @@ const EventList = () => {
             )}
 
 
-            <div style={styles.eventsContainer}>
-                {events.map((event, index) => (
-                    <div
-                        key={event.id}
-                        style={{
-                            ...styles.listItem,
-                            ...(index % 2 === 0 ? styles.evenItem : styles.oddItem),
-                        }}
-                    >
-                        <div className="title" style={{ marginBottom: "10px" }}>
-                            {event.name}
-                        </div>
-                        <button
-                            style={{
-                                ...styles.button,
-                                ...(index % 2 === 0 ? styles.whiteButton : styles.yellowButton),
-                            }}
-                            onClick={() => {
-                                setSelectedEventId(event.id!);
-                                setDesiredCommand(2);
-                            }}
-                        >
-                            View Details
-                        </button>
-                        {selectedEventId === event.id &&
-                            desiredCommand === 2 && (
-                                <EventDetailsForm eventDetail={event} />
-                            )}
-                    </div>
-                ))}
-            </div>
-
             <div style={styles.buttonContainer}>
                 <button
                     style={styles.inputButton}
@@ -348,7 +417,7 @@ const EventList = () => {
                 >
                     Prev
                 </button>
-                <span style={{ margin: "0 10px" }}>{currentPage}</span>
+                <span style={{margin: "0 10px"}}>{currentPage}</span>
                 <button
                     style={styles.inputButton}
                     onClick={handleClickNext}
@@ -356,11 +425,6 @@ const EventList = () => {
                 >
                     Next
                 </button>
-
-                <Routes>
-                    {/* <Route path="showlist/details" element={<RecipeDetailsForm recipeDetail={recipe} />} /> */}
-                    <Route path="showlist/add-event" Component={AddEventForm} />
-                </Routes>
             </div>
         </div>
     );
@@ -386,6 +450,7 @@ const styles: { [key: string]: CSSProperties } = {
         fontSize: "16px",
         borderRadius: "8px",
         border: "1px solid #ccc",
+        marginBottom: "20px",
     },
 
     searchIconButton: {
@@ -418,7 +483,7 @@ const styles: { [key: string]: CSSProperties } = {
         color: "black",
     },
     oddItem: {
-        backgroundColor: "#ecb753",
+        backgroundColor: "rgba(121, 156, 178, 1)",
         color: "black",
     },
     button: {
@@ -430,14 +495,14 @@ const styles: { [key: string]: CSSProperties } = {
     },
     whiteButton: {
         backgroundColor: "#ffffff",
-        color: "#ecb753",
+        color: "rgba(121, 156, 178, 1)",
     },
     yellowButton: {
-        backgroundColor: "#ecb753",
+        backgroundColor: "rgba(121, 156, 178, 1)",
         color: "#ffffff",
     },
     inputButton: {
-        backgroundColor: "#ecb753",
+        backgroundColor: "rgba(121, 156, 178, 1)",
         color: "#333333",
         padding: "10px",
         fontSize: "16px",
