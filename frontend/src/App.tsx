@@ -47,6 +47,8 @@ import ShowAllEvents from "./components/EventsComponent/showAllEvents.tsx";
 import Logout from "./components/LoginSignUpComponents/Logout.tsx";
 import UserProfile from "./components/UserComponents/userDetailView.tsx";
 import UserUpdate from "./components/UserComponents/userUpdateData.tsx";
+import Donate from "./components/LoginSignUpComponents/Donate.tsx";
+import WelcomePage from "./components/LoginSignUpComponents/FirstPageWithInfo.tsx";
 // import Logout from "./components/LoginSignUpComponents/Logout";
 
 // import UserRecipeList from "./components/RecipeComponents/userRecipes";
@@ -67,7 +69,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route
-          path="/"
+          path="/getStarted"
           element={
             <Welcome
               email={email}
@@ -83,6 +85,12 @@ function App() {
           }
         />
         <Route
+          path="/welcome"
+          element={
+            <WelcomePage />
+          }
+        />
+        <Route
           path="/signUp"
           element={
             <SignUp setLoggedIn={setLoggedIn} setEmail={setEmail} />
@@ -95,6 +103,7 @@ function App() {
           element={<ShowAllEvents></ShowAllEvents>}
         />
         <Route path="/logout" element={<Logout></Logout>} />
+        <Route path="/donate" element={<Donate></Donate>} />
 
 
         {/*<Route*/}
