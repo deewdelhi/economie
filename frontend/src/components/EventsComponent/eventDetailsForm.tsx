@@ -13,8 +13,6 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
     const [preferences, setPreferences] = useState<Preference[]>([]);
     const [skills, setSkills] = useState<Skill[]>([]);
     const [desiredCommand, setDesiredCommand] = useState(-1);
-    console.log(props.eventDetail.creator);
-    console.log(props.eventDetail.creator);
     const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
 
     const openDeletePopup = () => {
@@ -66,8 +64,13 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
 
     const currentPreferencesSet = new Set();
     const currentSkillsSet = new Set();
+    console.log("---------------------------");
+    console.log(props.eventDetail.preferences);
+    console.log("---------------------------");
+    console.log(props.eventDetail.skills);
+
     props.eventDetail.preferences.forEach((item: number) => {
-        // Ensure 'preferences' array is defined and item is a valid index
+
         if (preferences && preferences[item - 1] && preferences[item - 1].name) {
             currentPreferencesSet.add(preferences[item - 1].name);
         } else {
@@ -88,6 +91,9 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
     });
     const currentPreferences = Array.from(currentPreferencesSet);
     const currentSkills = Array.from(currentSkillsSet);
+    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+    console.log(currentPreferences);
+    console.log(currentSkills);
 
     useEffect(() => {
         setFormData({
@@ -120,12 +126,12 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
     }, [preferences]);
 
     useEffect(() => {
-        const eventPreferences = skills.filter(
+        const eventSkills = skills.filter(
             (skill) =>
                 props.eventDetail.skills.indexOf(skill.id) > -1
         );
         setSkillNames([]);
-        eventPreferences.forEach((skill) =>
+        eventSkills.forEach((skill) =>
             setSkillNames((skillArr) => [
                 ...skillArr,
                 skill.name,
@@ -228,6 +234,7 @@ const EventDetailsForm = (props: { eventDetail: any; onClose: () => void }) => {
                     <div style={styles.preferencesContainer}>
                         <h2>Preferences:</h2>
                         <ul>
+
                             {currentPreferences.map((preference, index) => (
                                 <li key={index}>{preference}</li>
                             ))}

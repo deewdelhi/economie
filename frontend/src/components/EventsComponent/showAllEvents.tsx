@@ -205,6 +205,9 @@ const EventList = () => {
                         <Link to="/logout">
                             <button style={styles.userMenuItem}>Logout</button>
                         </Link>
+                        <Link to="/donate">
+                            <button style={styles.userMenuItem}>Donate</button>
+                        </Link>
                     </div>
                 )}
             </div>

@@ -2,13 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 const Welcome = (props: { loggedIn: any; email: any; setLoggedIn: any }) => {
-    const { loggedIn, email } = props;
+    const { loggedIn, email, setLoggedIn } = props;
     const navigate = useNavigate();
 
     const onButtonClickLogIn = () => {
         if (loggedIn) {
             localStorage.removeItem("user");
-            props.setLoggedIn(false);
+            setLoggedIn(false);
         } else {
             navigate("/login");
         }
@@ -21,7 +21,7 @@ const Welcome = (props: { loggedIn: any; email: any; setLoggedIn: any }) => {
     return (
         <div style={styles.mainContainer}>
             <div style={styles.titleContainer}>Welcome!</div>
-            <div style={styles.titleContainer}>SignUp or log in</div>
+            <div style={styles.subtitle}>Sign up or log in</div>
             <div style={styles.buttonContainer}>
                 <input
                     style={styles.inputButton}
@@ -29,69 +29,74 @@ const Welcome = (props: { loggedIn: any; email: any; setLoggedIn: any }) => {
                     onClick={onButtonClickLogIn}
                     value={loggedIn ? "Log out" : "Log in"}
                 />
-
                 <input
                     style={styles.signInButton}
                     type="button"
                     onClick={onButtonClickSignUp}
-                    value="SignUp"
+                    value="Sign up"
                 />
-                {loggedIn && <div>Your username is {email}</div>}
+                {loggedIn && (
+                    <div style={styles.infoText}>Your username is {email}</div>
+                )}
             </div>
         </div>
     );
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-    body: {
-        backgroundColor: "red",
-        margin: 0,
-        fontFamily: "Arial, sans-serif",
-    },
     mainContainer: {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "20px",
-        backgroundColor: "#f8f8f8",
-        borderRadius: "10px",
-        boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-        margin: "20px",
+        padding: "40px",
+        backgroundColor: "rgba(50, 50, 50, 0.85)",
+        borderRadius: "12px",
+        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+        margin: "60px auto",
+        maxWidth: "500px",
+        color: "white",
     },
-
     titleContainer: {
-        fontSize: "24px",
+        fontSize: "28px",
         fontWeight: "bold",
-        marginBottom: "15px",
-        color: "black",
+        color: "rgba(121, 156, 178, 1)",
+        marginBottom: "10px",
     },
-
+    subtitle: {
+        fontSize: "18px",
+        color: "rgba(121, 156, 178, 0.6)",
+        marginBottom: "20px",
+    },
     buttonContainer: {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        marginTop: "20px",
+        gap: "10px",
     },
-
     inputButton: {
-        backgroundColor: "#ecb753",
-        color: "black",
-        padding: "10px",
+        backgroundColor: "rgba(121, 156, 178, 1)",
+        color: "white",
+        padding: "10px 20px",
         fontSize: "16px",
         border: "none",
-        borderRadius: "5px",
+        borderRadius: "6px",
         cursor: "pointer",
-        marginBottom: "10px",
+        width: "160px",
     },
-
     signInButton: {
-        backgroundColor: "#ecb753",
-        color: "black",
-        padding: "10px",
+        backgroundColor: "rgba(121, 156, 178, 0.6)",
+        color: "white",
+        padding: "10px 20px",
         fontSize: "16px",
         border: "none",
-        borderRadius: "5px",
+        borderRadius: "6px",
         cursor: "pointer",
+        width: "160px",
+    },
+    infoText: {
+        marginTop: "20px",
+        color: "#ddd",
+        fontSize: "14px",
     },
 };
 
