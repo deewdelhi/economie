@@ -6,7 +6,7 @@ import {Skill} from "../../models/Skill.ts";
 import Popup from "./PopUp.tsx";
 import DeleteEvent from "./deleteEvent.tsx";
 import UpdateEventForm from "./updateEventForm.tsx";
-import {useLocation, useParams} from "react-router-dom";
+import {useLocation} from "react-router-dom";
 
 
 const EventDetailsForm = () => {

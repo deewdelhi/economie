@@ -16,10 +16,15 @@ class UserSkillsWithEvents(APIView):
             user = User.objects.get(id=id)
             skills = user.skills.all()
 
+            result = []
             for skill in skills:
                 events = Event.objects.filter(skills=skill)
-                serialized_events = EventSerializer(events, many=True).data
-            return Response(serialized_events, status=status.HTTP_200_OK)
+                result.append({
+                    'skill': SkillSerializer(skill).data,
+                    'events': EventSerializer(events, many=True).data
+                })
+
+            return Response(result, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 

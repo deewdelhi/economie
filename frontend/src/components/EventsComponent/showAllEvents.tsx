@@ -45,7 +45,6 @@ const EventList = () => {
                         }
                     }
                 );
-                console.log('token ' + getAuthToken())
                 const data2 = await response2.json();
                 setAllEvents(data2);
 
@@ -70,7 +69,7 @@ const EventList = () => {
         fetchData();
     }, [filters, currentPage]); // 👈 now it listens for filter and page changes
 
-    const [skillEventList, setSkillEventList] = useState([]);
+    const [skillUserList, setskillUserList] = useState([]);
 
     useEffect(() => {
         const fetchSkillEvents = async () => {
@@ -83,8 +82,8 @@ const EventList = () => {
             });
             const data = await response.json();
             console.log(data)
-            setSkillEventList(data);
-            console.log(skillEventList)
+            setskillUserList(data);
+            console.log(skillUserList)
         };
 
         fetchSkillEvents();
@@ -175,7 +174,8 @@ const EventList = () => {
                         method: 'GET',
                         headers: {
                             'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            'Content-Type': 'application/json',         //
+                            // optional for GET, but useful for other methods
                             // Add any other custom headers here
                         }
                     }
@@ -201,97 +201,145 @@ const EventList = () => {
                     e.preventDefault();
                     handleFilterSubmit();
                 }}>
-                    <input
-                        type="text"
-                        placeholder="Search events by name..."
-                        value={filterName}
-                        onChange={handleSearchChange}
-                        style={styles.searchInput}
-                    />
-                    <button
-                        onClick={() => setViewOption("matching")}
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: viewOption === "matching" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
-                            border: "1px solid #ccc",
-                            borderRadius: "14px",
-                            cursor: "pointer",
-                        }}
-                    >
-                        Matching Events
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Search events by name..."
+                            value={filterName}
+                            onChange={handleSearchChange}
+                            style={styles.searchInput}
+                        />
+                        <button
+                            onClick={() => setViewOption("matching")}
+                            style={{
+                                padding: "8px 12px",
+                                backgroundColor: viewOption === "matching" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
+                                border: "1px solid #ccc",
+                                borderRadius: "14px",
+                                cursor: "pointer",
+                                marginLeft: "300px"
+                            }}
+                        >
+                            Matching Events
+                        </button>
+                        <button
+                            onClick={() => setViewOption("all")}
+                            style={{
+                                padding: "8px 12px",
+                                backgroundColor: viewOption === "all" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
+                                border: "0px solid #ccc",
+                                borderRadius: "14px",
+                                cursor: "pointer",
+                                marginLeft: "20px"
+                            }}
+                        >
+                            All Events
+                        </button>
+                    </div>
+                    <button style={styles.searchIconButton} onClick={() => {
+                        setShowFilterModalName(true);
+                    }}>
+                        <FaSearch/>
                     </button>
-                    <button
-                        onClick={() => setViewOption("all")}
-                        style={{
-                            padding: "8px 12px",
-                            backgroundColor: viewOption === "all" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
-                            border: "0px solid #ccc",
-                            borderRadius: "14px",
-                            cursor: "pointer",
-                            marginLeft: "20px"
-                        }}
-                    >
-                        All Events
-                    </button>
+                    <div style={styles.userIconWrapper}>
+                        <button style={styles.userIconButton} onClick={() => setShowUserMenu((prev) => !prev)}>
+                            <VscAccount/>
+                        </button>
+                        {showUserMenu && (
+                            <div style={styles.userMenu}>
+                                <Link to="/userDetail">
+                                    <button style={styles.userMenuItem}>Profile</button>
+                                </Link>
+                                <Link to="/logout">
+                                    <button style={styles.userMenuItem}>Logout</button>
+                                </Link>
+                                <Link to="/donate">
+                                    <button style={styles.userMenuItem}>Donate</button>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
 
                 </form>
-                <button style={styles.searchIconButton} onClick={() => {
-                    setShowFilterModalName(true);
-                }}>
-                    <FaSearch/>
-                </button>
-            </div>
 
-            <div style={styles.userIconWrapper}>
-                <button style={styles.userIconButton} onClick={() => setShowUserMenu((prev) => !prev)}>
-                    <VscAccount/>
-                </button>
-                {showUserMenu && (
-                    <div style={styles.userMenu}>
-                        <Link to="/userDetail">
-                            <button style={styles.userMenuItem}>Profile</button>
-                        </Link>
-                        <Link to="/logout">
-                            <button style={styles.userMenuItem}>Logout</button>
-                        </Link>
-                        <Link to="/donate">
-                            <button style={styles.userMenuItem}>Donate</button>
-                        </Link>
-                    </div>
-                )}
+
             </div>
 
             {viewOption === "matching" ? (
-                <div style={{marginTop: "20px"}}>
+                <div style={{marginTop: "120px"}}>
                     <h2 style={{fontSize: "24px", marginBottom: "10px"}}>Your Skills & Matching Events</h2>
-                    {skillEventList.map((entry: any) => {
-                        if (!entry || !entry.skill) {
-                            return null; // skip if missing skill info
-                        }
+                    {skillUserList.map((entry: any) => {
+                        if (!entry) return null;
                         return (
                             <div key={entry.skill.id} style={{marginBottom: "30px"}}>
-                                <h3 style={{fontSize: "20px", color: "rgba(121, 156, 178, 1)"}}>{entry.skill.name}</h3>
+                                <h3 style={{fontSize: "20px", color: "rgba(121, 156, 178, 1)"}}>
+                                    {entry.skill.name}
+                                </h3>
                                 {entry.events && entry.events.length > 0 ? (
-                                    <ul style={{paddingLeft: "20px"}}>
-                                        {entry.events.map((event: Event) => (
-                                            <li key={event.id}>
-                                                <span
-                                                    style={{fontWeight: "bold"}}>{event.name}</span> – {event.location} on{" "}
-                                                {new Date(event.starting_date).toLocaleDateString()}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    <div style={{
+                                        display: "grid",
+                                        gridTemplateColumns: "repeat(3, 1fr)",
+                                        gap: "20px",
+                                        marginTop: "30px"
+                                    }}>
+                                        {entry.events.map((event: Event, index: number) => {
+                                            const first50Words = event.description
+                                                ?.split(' ')
+                                                .slice(0, 20)
+                                                .join(' ') + '...';
+
+                                            return (
+                                                <div
+                                                    key={event.id}
+                                                    style={{
+                                                        ...styles.listItem,
+                                                        minHeight: "200px",
+                                                        padding: "20px",
+                                                        fontSize: "16px",
+                                                        ...(index % 2 === 0 ? styles.evenItem : styles.oddItem),
+                                                    }}
+                                                >
+                                                    <div className="title" style={{
+                                                        marginBottom: "10px",
+                                                        fontWeight: "bold",
+                                                        fontSize: "18px"
+                                                    }}>
+                                                        {event.name}
+                                                    </div>
+
+                                                    <div style={{marginBottom: "15px", color: "#444"}}>
+                                                        {first50Words}
+                                                    </div>
+                                                    <div>
+                                                        Location: {event.location}
+                                                    </div>
+
+                                                    <button
+                                                        style={{
+                                                            ...styles.button,
+                                                            ...(index % 2 === 0 ? styles.whiteButton : styles.yellowButton),
+                                                        }}
+                                                        onClick={() =>
+                                                            navigate(`/events/${event.id}`, {state: event})
+                                                        }
+                                                    >
+                                                        View Details
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 ) : (
                                     <p style={{fontStyle: "italic"}}>No events available for this skill.</p>
                                 )}
                             </div>
                         );
                     })}
-
                 </div>
             ) : (
-                <div style={styles.eventsContainer}>
+                <div style={{display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", marginTop: "30px"}}>
                     {events.map((event, index) => (
+
                         <div
                             key={event.id}
                             style={{
@@ -299,8 +347,23 @@ const EventList = () => {
                                 ...(index % 2 === 0 ? styles.evenItem : styles.oddItem),
                             }}
                         >
-                            <div className="title" style={{marginBottom: "10px"}}>
+                            <div className="title" style={{
+                                marginBottom: "10px",
+                                fontWeight: "bold",
+                                fontSize: "18px"
+                            }}>
                                 {event.name}
+                            </div>
+
+                            <div style={{marginBottom: "15px", color: "#444"}}>
+                                {event.description
+                                    ?.split(' ')
+                                    .slice(0, 20)
+                                    .join(' ') + '...'}
+                            </div>
+
+                            <div>
+                                Location: {event.location}
                             </div>
 
                             <button
@@ -308,7 +371,7 @@ const EventList = () => {
                                     ...styles.button,
                                     ...(index % 2 === 0 ? styles.whiteButton : styles.yellowButton),
                                 }}
-                                onClick={() => navigate(`/events/${event.id}`, { state: event })}
+                                onClick={() => navigate(`/events/${event.id}`, {state: event})}
                             >
                                 View Details
                             </button>
@@ -437,25 +500,32 @@ const styles: { [key: string]: CSSProperties } = {
 
     searchContainer: {
         position: "fixed",
-        top: "10px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "300px",
-        zIndex: 100,
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: "#2d2d2d", // transparent look
+        backdropFilter: "blur(8px)", // optional frosted effect
+        padding: "10px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottom: "1px solid rgba(200, 200, 200, 0.3)",
     },
 
     searchInput: {
-        width: "100%",
+        width: "35%",
         padding: "10px 40px 10px 10px", // leave space for icon on the right
         fontSize: "16px",
         borderRadius: "8px",
         border: "1px solid #ccc",
         marginBottom: "20px",
+        marginLeft: "300px",
     },
 
     searchIconButton: {
         position: "absolute",
-        left: "350px",
+        left: "950px",
         top: "30px",
         transform: "translateY(-50%)",
         background: "none",
@@ -469,8 +539,9 @@ const styles: { [key: string]: CSSProperties } = {
         flexWrap: "wrap",
         gap: "20px",
     },
+
     listItem: {
-        width: "300px",
+        width: "400px",
         border: "1px solid #ecb753",
         borderRadius: "5px",
         padding: "15px",
@@ -502,13 +573,12 @@ const styles: { [key: string]: CSSProperties } = {
         color: "#ffffff",
     },
     inputButton: {
+        padding: "10px 20px",
+        borderRadius: "10px",
         backgroundColor: "rgba(121, 156, 178, 1)",
-        color: "#333333",
-        padding: "10px",
-        fontSize: "16px",
+        color: "white",
         border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
+        cursor: "pointer"
     },
     buttonContainer: {
         display: "flex",
@@ -536,6 +606,7 @@ const styles: { [key: string]: CSSProperties } = {
         flexDirection: "column",
         gap: "10px",
     },
+
     userIconWrapper: {
         position: "absolute",
         border: "none",
