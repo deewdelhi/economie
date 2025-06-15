@@ -1,9 +1,7 @@
 from datetime import date
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from rest_framework.exceptions import ValidationError
-
 from preference.models import Preference
 from skill.models import Skill
 
@@ -29,6 +27,7 @@ class User(AbstractUser):
     date_of_birth = models.DateField(default=date.today)
     preferences = models.ManyToManyField(Preference, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
+    events = models.ManyToManyField('event.Event', blank=True, related_name='participants')
 
     class Meta:
         app_label = 'user'
