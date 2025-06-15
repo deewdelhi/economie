@@ -49,6 +49,8 @@ import UserProfile from "./components/UserComponents/userDetailView.tsx";
 import UserUpdate from "./components/UserComponents/userUpdateData.tsx";
 import Donate from "./components/LoginSignUpComponents/Donate.tsx";
 import WelcomePage from "./components/LoginSignUpComponents/FirstPageWithInfo.tsx";
+import PersonalEventsList from "./components/EventsComponent/PersonalEventList.tsx";
+import MyActivityList from "./components/EventsComponent/MyActivityList.tsx";
 import EventDetailsPage from "./components/EventsComponent/eventDetailsForm.tsx";
 // import Logout from "./components/LoginSignUpComponents/Logout";
 
@@ -79,7 +81,7 @@ function App() {
             />
           }
         />
-          <Route path="/events/:id" element={<EventDetailsPage />} />
+        <Route path="/events/:id" element={<EventDetailsPage />} />
         <Route
           path="/login"
           element={
@@ -105,6 +107,8 @@ function App() {
           element={<ShowAllEvents></ShowAllEvents>}
         />
         <Route path="/logout" element={<Logout></Logout>} />
+        <Route path="/personalEvents" element={<PersonalEventsList></PersonalEventsList>} />
+        <Route path="/myActivity" element={<MyActivityList></MyActivityList>} />
 
 
         {/*<Route*/}
