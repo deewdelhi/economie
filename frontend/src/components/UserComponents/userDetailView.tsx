@@ -5,13 +5,16 @@ import { User } from "../../models/User";
 import { Event } from "../../models/Event";
 import EventDetailsForm from "../EventsComponent/eventDetailsForm.tsx"; // adjust path
 import { getAuthToken } from "../../util/auth";
+import { Skill } from "../../models/Skill";
+import { Preference } from "../../models/Preference";
 
 const UserProfile: React.FC = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<User | null>(null);
   const [userEvents, setUserEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [allPreferences, setAllPreferences] = useState<Preference[]>([]);
   const overlayColor = "rgba(135, 206, 250, 0.8)";
   const darkOverlay = "rgba(107, 107, 107, 0.8)";
   const combinedBackground = `linear-gradient(135deg, ${overlayColor}, ${darkOverlay})`;
@@ -26,6 +29,12 @@ const UserProfile: React.FC = () => {
 
   const handleUpdateProfile = () => {
     navigate("/userUpdate");
+  };
+  const handlePersonalEvents = () => {
+    navigate("/personalEvents");
+  };
+  const handleMyActivity = () => {
+    navigate("/myActivity"); //TODO: work in progress waiting for backend
   };
 
   useEffect(() => {
@@ -50,6 +59,30 @@ const UserProfile: React.FC = () => {
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
+
+      const [skillsRes, prefsRes] = await Promise.all([
+        fetch("http://127.0.0.1:8000/skills", {
+          headers: {
+            Authorization: `token ${getAuthToken()}`,
+            "Content-Type": "application/json",
+          },
+        }),
+        fetch("http://127.0.0.1:8000/preferences", {
+          headers: {
+            Authorization: `token ${getAuthToken()}`,
+            "Content-Type": "application/json",
+          },
+        }),
+      ]);
+
+      const [skills, preferences] = await Promise.all([
+        skillsRes.json(),
+        prefsRes.json(),
+      ]);
+
+      setAllSkills(skills);
+      setAllPreferences(preferences);
+
     };
 
     const fetchEvents = async () => {
@@ -130,14 +163,27 @@ const UserProfile: React.FC = () => {
         { label: "Date of Birth", value: userData.date_of_birth },
         {
           label: "Skills",
-          value: userData.skills.length > 0 ? userData.skills.join(", ") : "No skills listed",
-        },
+          value: (
+            userData.skills.length > 0
+              ? allSkills
+                .filter((skill) => userData.skills.map(Number).includes(skill.id))
+                .map((skill) => skill.name)
+                .join(", ")
+              : "No skills selected"
+          )
+        }
+        ,
         {
           label: "Preferences",
           value:
-            userData.preferences.length > 0
-              ? userData.preferences.join(", ")
-              : "No preferences listed",
+            (
+              userData.preferences.length > 0
+                ? allPreferences
+                  .filter((preference) => userData.preferences.map(Number).includes(preference.id))
+                  .map((preference) => preference.name)
+                  .join(", ")
+                : "No preferences selected"
+            )
         },
       ].map(({ label, value }) => (
         <div
@@ -205,6 +251,46 @@ const UserProfile: React.FC = () => {
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#87cefa")}
       >
         Update Profile
+      </button>
+      <button
+        onClick={handlePersonalEvents}
+        style={{
+          marginTop: 32,
+          width: "100%",
+          padding: "12px 0",
+          borderRadius: 8,
+          backgroundColor: "#87cefa",
+          border: "none",
+          color: "#0d1a26",
+          fontWeight: "700",
+          fontSize: 18,
+          cursor: "pointer",
+          transition: "background-color 0.3s ease",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#69b3d9")}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#87cefa")}
+      >
+        See my events
+      </button>
+      <button
+        onClick={handleMyActivity}
+        style={{
+          marginTop: 32,
+          width: "100%",
+          padding: "12px 0",
+          borderRadius: 8,
+          backgroundColor: "#87cefa",
+          border: "none",
+          color: "#0d1a26",
+          fontWeight: "700",
+          fontSize: 18,
+          cursor: "pointer",
+          transition: "background-color 0.3s ease",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#69b3d9")}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#87cefa")}
+      >
+        See my activity
       </button>
 
       {selectedEvent && (
