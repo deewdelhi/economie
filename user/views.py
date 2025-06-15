@@ -1,6 +1,7 @@
 from dj_rest_auth.registration.views import RegisterView
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView
 from rest_framework.authtoken.models import Token
@@ -58,3 +59,16 @@ class AuthenticationView(LoginView):
             },
             status=status.HTTP_200_OK,
         )
+
+@api_view(['POST'])
+def rate_user(request, user_id):
+    rating = int(request.GET.get('rate'))
+    try:
+        user = User.objects.get(pk=user_id)
+        user.rating += rating
+        user.rated_by += 1
+        user.save()
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"message": "Successfully rated the user."}, status=status.HTTP_200_OK)

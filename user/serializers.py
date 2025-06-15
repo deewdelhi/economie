@@ -8,6 +8,8 @@ from user.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
@@ -25,6 +27,12 @@ class UserSerializer(serializers.ModelSerializer):
             "skills",
             "preferences"
         )
+
+    def get_rating(self, obj):
+        # Calculate average rating safely
+        if obj.rated_by and obj.rated_by > 0:
+            return str(round(obj.rating / obj.rated_by, 2))
+        return str(0.0)
 
 
 class RegisterUserSerializer(RegisterSerializer):

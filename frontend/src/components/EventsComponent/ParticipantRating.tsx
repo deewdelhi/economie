@@ -27,17 +27,16 @@ const ParticipantRatingPopup: React.FC<ParticipantRatingPopupProps> = ({
         if (!rating) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/ratings/${eventId}/${userId}/`, {
+            const response = await fetch(`http://127.0.0.1:8000/users/${userId}/rate/?rate=${rating}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Token ${localStorage.getItem('token')}`, // Adjust to your auth logic
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ rating }),
+                }
             });
 
             if (response.ok) {
-                alert(`Rated ${userId} with ${rating} star(s)`);
+                alert(`Rated with ${rating} star(s)`);
             } else {
                 alert("Failed to submit rating");
             }

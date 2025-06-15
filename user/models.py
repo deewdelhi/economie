@@ -23,7 +23,8 @@ class User(AbstractUser):
         default=UserRole.INDIVIDUAL
     )
     description = models.TextField()
-    rating = models.IntegerField(validators=[validate_rating], default=0)
+    rating = models.FloatField(validators=[validate_rating], default=0)
+    rated_by = models.IntegerField(default=0)
     date_of_birth = models.DateField(default=date.today)
     preferences = models.ManyToManyField(Preference, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)

@@ -16,11 +16,11 @@ const EventDetailsForm = () => {
     const [desiredCommand, setDesiredCommand] = useState(-1);
     const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
 
-const [participants, setParticipants] = useState<any[]>([]);
-const [isParticipantPopupOpen, setParticipantPopupOpen] = useState(false);
+    const [participants, setParticipants] = useState<any[]>([]);
+    const [isParticipantPopupOpen, setParticipantPopupOpen] = useState(false);
 
 
-    const { state: event } = useLocation();
+    const {state: event} = useLocation();
 
 
     const openDeletePopup = () => {
@@ -32,42 +32,42 @@ const [isParticipantPopupOpen, setParticipantPopupOpen] = useState(false);
     };
 
 
-const fetchParticipants = async () => {
-    try {
-        const res = await fetch(`http://127.0.0.1:8000/events/${event.id}/participants/`, {
-            headers: {
-                'Authorization': `Token ${getAuthToken()}`,
-            },
-        });
-        const data = await res.json();
-        setParticipants(data);
-        setParticipantPopupOpen(true);
-    } catch (err) {
-        console.error('Error fetching participants:', err);
-    }
-};
-
-
-const handleJoinEvent = async () => {
-    try {
-        const response = await fetch(`http://127.0.0.1:8000/events/${event.id}/join/`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `token ${getAuthToken()}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (response.ok) {
-            alert("You successfully joined the event!");
-        } else {
-            alert("Failed to join event.");
+    const fetchParticipants = async () => {
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/events/${event.id}/participants/`, {
+                headers: {
+                    'Authorization': `Token ${getAuthToken()}`,
+                },
+            });
+            const data = await res.json();
+            setParticipants(data);
+            setParticipantPopupOpen(true);
+        } catch (err) {
+            console.error('Error fetching participants:', err);
         }
-    } catch (error) {
-        console.error("Join error:", error);
-        alert("An error occurred while joining.");
-    }
-};
+    };
+
+
+    const handleJoinEvent = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/events/${event.id}/join/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${getAuthToken()}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                alert("You successfully joined the event!");
+            } else {
+                alert("Failed to join event.");
+            }
+        } catch (error) {
+            console.error("Join error:", error);
+            alert("An error occurred while joining.");
+        }
+    };
 
 
     useEffect(() => {
@@ -150,6 +150,7 @@ const handleJoinEvent = async () => {
             ending_date: event.ending_date,
             creator: event.creator,
             capacity: event.capacity,
+            rating: event.rating,
             location: event.location,
             preferences: event.preferences,
             skills: event.skills
@@ -171,6 +172,7 @@ const handleJoinEvent = async () => {
             ])
         );
     }, [preferences]);
+
 
     useEffect(() => {
         const eventSkills = skills.filter(
@@ -197,6 +199,35 @@ const handleJoinEvent = async () => {
         preferences: "",
         skills: ""
     });
+
+    const [userRating, setUserRating] = useState<number>(0);
+
+    const submitRating = async () => {
+        if (userRating < 1 || userRating > 5) {
+            alert("Please select a rating between 1 and 5");
+            return;
+        }
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/events/${event.id}/rate/?rate=${userRating}`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `token ${getAuthToken()}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            if (res.ok) {
+                alert("Thank you for rating the event!");
+                setUserRating(0);
+                // Optionally, refresh event details here to get updated average_rating
+            } else {
+                alert("Failed to rate event.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error rating event.");
+        }
+    };
+
 
     const [preferenceNames, setPreferenceNames] = useState<string[]>([]);
     const [skillNames, setSkillNames] = useState<string[]>([]);
@@ -272,6 +303,13 @@ const handleJoinEvent = async () => {
                         </p>
                         <p>
                             <b>
+                                {"Rating: ".concat(
+                                    // String(formData.rating)
+                                )}
+                            </b>
+                        </p>
+                        <p>
+                            <b>
                                 {"Location: ".concat(
                                     String(formData.location)
                                 )}{" "}
@@ -303,69 +341,162 @@ const handleJoinEvent = async () => {
                 </div>
 
                 <div id="buttons-container">
-  {String(event.creator) === String(getUserID()) ? (
-  <div>
-    <button
-      style={styles.inputButton}
-      onClick={() => {
-        setDesiredCommand(0);
-        openDeletePopup();
-      }}
-    >
-      Delete
-    </button>
-    <button
-      style={styles.inputButton}
-      onClick={() => {
-        setDesiredCommand(1);
-      }}
-    >
-      Update
-    </button>
-    <button style={styles.inputButton} onClick={fetchParticipants}>
-        View Participants / Rate
-    </button>
+                    {String(event.creator) === String(getUserID()) ? (
+                        <div>
+                            <button
+                                style={styles.inputButton}
+                                onClick={() => {
+                                    setDesiredCommand(0);
+                                    openDeletePopup();
+                                }}
+                            >
+                                Delete
+                            </button>
+                            <button
+                                style={styles.inputButton}
+                                onClick={() => {
+                                    setDesiredCommand(1);
+                                }}
+                            >
+                                Update
+                            </button>
+                            <button style={styles.inputButton} onClick={fetchParticipants}>
+                                View Participants / Rate
+                            </button>
 
-    {isParticipantPopupOpen && (
-        <ParticipantRatingPopup
-            participants={participants}
-            eventId={event.id}
-            onClose={() => setParticipantPopupOpen(false)}
-        />
-    )}
-  </div>
-  ) : (
-    <button
-      style={styles.inputButton}
-      onClick={async () => {
-        const response = await fetch(`http://127.0.0.1:8000/events/${event.id}/join/`, {
-          method: "POST",
-          headers: {
-            "Authorization": `token ${getAuthToken()}`,
-            "Content-Type": "application/json",
-          }
-        });
+                            {isParticipantPopupOpen && (
+                                <ParticipantRatingPopup
+                                    participants={participants}
+                                    eventId={event.id}
+                                    onClose={() => setParticipantPopupOpen(false)}
+                                />
+                            )}
+                        </div>
+                    ) : (
 
-        if (response.ok) {
-          alert("You have joined the event!");
-        } else {
-          alert("Failed to join event.");
-        }
-      }}
-    >
-      Join Event
-    </button>
-  )}
+                        <div id="buttons-container">
+                            {String(event.creator) === String(getUserID()) ? (
+                                // creator buttons ...
+                                <>
+                                    <button
+                                        style={styles.inputButton}
+                                        onClick={() => {
+                                            setDesiredCommand(0);
+                                            openDeletePopup();
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        style={styles.inputButton}
+                                        onClick={() => {
+                                            setDesiredCommand(1);
+                                        }}
+                                    >
+                                        Update
+                                    </button>
+                                    <button style={styles.inputButton} onClick={fetchParticipants}>
+                                        View Participants / Rate
+                                    </button>
 
-  {desiredCommand === 0 && isDeletePopupOpen && (
-    <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
-      <DeleteEvent eventToDelete={event} />
-    </Popup>
-  )}
-  {desiredCommand === 1 && (
-    <UpdateEventForm eventToUpdate={event} />
-  )}
-</div>
+                                    {isParticipantPopupOpen && (
+                                        <ParticipantRatingPopup
+                                            participants={participants}
+                                            eventId={event.id}
+                                            onClose={() => setParticipantPopupOpen(false)}
+                                        />
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        style={styles.inputButton}
+                                        onClick={async () => {
+                                            const response = await fetch(`http://127.0.0.1:8000/events/${event.id}/join/`, {
+                                                method: "POST",
+                                                headers: {
+                                                    "Authorization": `token ${getAuthToken()}`,
+                                                    "Content-Type": "application/json",
+                                                },
+                                            });
+
+                                            if (response.ok) {
+                                                alert("You have joined the event!");
+                                            } else {
+                                                alert("Failed to join event.");
+                                            }
+                                        }}
+                                    >
+                                        Join Event
+                                    </button>
+
+                                    {/* Show stars and rating only for users who can join */}
+                                    <div style={{color: "#f5a623", fontSize: "20px", marginTop: 20, marginBottom: 10}}>
+                                        {Array.from({length: 5}).map((_, i) => {
+                                            const starNumber = i + 1;
+                                            return starNumber <= Math.floor(event.average_rating || 0) ? (
+                                                <span key={i}>★</span> // filled star
+                                            ) : (
+                                                <span key={i}>☆</span> // empty star
+                                            );
+                                        })}
+                                        <span style={{marginLeft: 8, fontSize: "16px", color: "#555"}}>
+          ({(event.average_rating || 0).toFixed(2)})
+        </span>
+                                    </div>
+
+                                    <div style={{marginBottom: "20px"}}>
+                                        <label style={{marginRight: 10}}>Rate this event:</label>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <span
+                                                key={star}
+                                                style={{
+                                                    cursor: "pointer",
+                                                    color: star <= userRating ? "#f5a623" : "#ccc",
+                                                    fontSize: "24px",
+                                                    marginRight: 5,
+                                                }}
+                                                onClick={() => setUserRating(star)}
+                                            >
+            ★
+          </span>
+                                        ))}
+                                        <button
+                                            style={{
+                                                marginLeft: 10,
+                                                padding: "5px 10px",
+                                                cursor: "pointer",
+                                            }}
+                                            onClick={submitRating}
+                                        >
+                                            Submit Rating
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Delete and Update popups */}
+                            {desiredCommand === 0 && isDeletePopupOpen && (
+                                <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
+                                    <DeleteEvent eventToDelete={event}/>
+                                </Popup>
+                            )}
+                            {desiredCommand === 1 && <UpdateEventForm eventToUpdate={event}/>}
+                        </div>
+
+
+                    )}
+
+                    {desiredCommand === 0 && isDeletePopupOpen && (
+                        <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
+                            <DeleteEvent eventToDelete={event}/>
+                        </Popup>
+                    )}
+                    {desiredCommand === 1 && (
+                        <UpdateEventForm eventToUpdate={event}/>
+                    )}
+
+                </div>
 
             </div>
         </div>

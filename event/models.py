@@ -12,6 +12,8 @@ class Event(models.Model):
     location = models.CharField(max_length=100)
     preferences = models.ManyToManyField(Preference, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
+    rating = models.FloatField(default=0)
+    rated_by = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.name}"

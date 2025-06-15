@@ -97,3 +97,16 @@ def join_event(request, event_id):
     user = request.user
     event.participants.add(user)
     return Response({"message": "Successfully joined the event."}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def rate_event(request, event_id):
+    rating = int(request.GET.get('rate'))
+    try:
+        event = Event.objects.get(pk=event_id)
+        event.rating += rating
+        event.rated_by += 1
+        event.save()
+    except User.DoesNotExist:
+        return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({"message": "Successfully rated the event."}, status=status.HTTP_200_OK)
