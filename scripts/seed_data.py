@@ -103,7 +103,7 @@ for i, event_name in enumerate(event_names):
 for user in users:
     joined_events = random.sample(events, k=random.randint(0,5))
     for event in joined_events:
-        if random.random() < 0.4:
+        if random.random() < 0.7:
             user.events.add(event)
 
 print("Seed completed!")
