@@ -7,6 +7,7 @@ import Popup from "./PopUp.tsx";
 import DeleteEvent from "./deleteEvent.tsx";
 import UpdateEventForm from "./updateEventForm.tsx";
 import {useLocation} from "react-router-dom";
+import ParticipantRatingPopup from "./ParticipantRating.tsx";
 
 
 const EventDetailsForm = () => {
@@ -14,6 +15,10 @@ const EventDetailsForm = () => {
     const [skills, setSkills] = useState<Skill[]>([]);
     const [desiredCommand, setDesiredCommand] = useState(-1);
     const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
+
+const [participants, setParticipants] = useState<any[]>([]);
+const [isParticipantPopupOpen, setParticipantPopupOpen] = useState(false);
+
 
     const { state: event } = useLocation();
 
@@ -25,6 +30,45 @@ const EventDetailsForm = () => {
     const closeDeletePopup = () => {
         setDeletePopupOpen(false);
     };
+
+
+const fetchParticipants = async () => {
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/events/${event.id}/participants/`, {
+            headers: {
+                'Authorization': `Token ${getAuthToken()}`,
+            },
+        });
+        const data = await res.json();
+        setParticipants(data);
+        setParticipantPopupOpen(true);
+    } catch (err) {
+        console.error('Error fetching participants:', err);
+    }
+};
+
+
+const handleJoinEvent = async () => {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/events/${event.id}/join/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `token ${getAuthToken()}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            alert("You successfully joined the event!");
+        } else {
+            alert("Failed to join event.");
+        }
+    } catch (error) {
+        console.error("Join error:", error);
+        alert("An error occurred while joining.");
+    }
+};
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -259,47 +303,70 @@ const EventDetailsForm = () => {
                 </div>
 
                 <div id="buttons-container">
-                    {event.creator == getUserID() && (
-                        <div>
-                            {" "}
-                            <td>
-                                {/* <Link to={`/delete-event`}> */}
-                                <button
-                                    style={styles.inputButton}
-                                    onClick={() => {
-                                        setDesiredCommand(0);
-                                        openDeletePopup();
-                                    }}
-                                >
-                                    Delete
-                                </button>
-                                {/* </Link> */}
-                            </td>
-                            <td>
-                                <button
-                                    style={styles.inputButton}
-                                    onClick={() => {
-                                        setDesiredCommand(1);
-                                    }}
-                                >
-                                    Update
-                                </button>
-                            </td>
-                        </div>
-                    )}
-                    {desiredCommand === 0 && isDeletePopupOpen && (
-                        <Popup
-                            isOpen={isDeletePopupOpen}
-                            onClose={closeDeletePopup}
-                        >
-                            <DeleteEvent eventToDelete={event}/>
-                        </Popup>
-                    )}
-                    {desiredCommand === 1 && (
-                        <UpdateEventForm eventToUpdate={event}/>
-                    )}
+  {String(event.creator) === String(getUserID()) ? (
+  <div>
+    <button
+      style={styles.inputButton}
+      onClick={() => {
+        setDesiredCommand(0);
+        openDeletePopup();
+      }}
+    >
+      Delete
+    </button>
+    <button
+      style={styles.inputButton}
+      onClick={() => {
+        setDesiredCommand(1);
+      }}
+    >
+      Update
+    </button>
+    <button style={styles.inputButton} onClick={fetchParticipants}>
+        View Participants / Rate
+    </button>
 
-                </div>
+    {isParticipantPopupOpen && (
+        <ParticipantRatingPopup
+            participants={participants}
+            eventId={event.id}
+            onClose={() => setParticipantPopupOpen(false)}
+        />
+    )}
+  </div>
+  ) : (
+    <button
+      style={styles.inputButton}
+      onClick={async () => {
+        const response = await fetch(`http://127.0.0.1:8000/events/${event.id}/join/`, {
+          method: "POST",
+          headers: {
+            "Authorization": `token ${getAuthToken()}`,
+            "Content-Type": "application/json",
+          }
+        });
+
+        if (response.ok) {
+          alert("You have joined the event!");
+        } else {
+          alert("Failed to join event.");
+        }
+      }}
+    >
+      Join Event
+    </button>
+  )}
+
+  {desiredCommand === 0 && isDeletePopupOpen && (
+    <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
+      <DeleteEvent eventToDelete={event} />
+    </Popup>
+  )}
+  {desiredCommand === 1 && (
+    <UpdateEventForm eventToUpdate={event} />
+  )}
+</div>
+
             </div>
         </div>
     );

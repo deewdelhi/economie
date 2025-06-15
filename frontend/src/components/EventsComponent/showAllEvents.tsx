@@ -22,7 +22,6 @@ const EventList = () => {
 
     const [showFilterModalName, setShowFilterModalName] = useState(false);
     const isAnyFilterModalOpen = showFilterModalName;
-    const [currentPage, setCurrentPage] = useState(1);
     const [showUserMenu, setShowUserMenu] = useState(false);
     let [filters, setFilters] = useState("");
 
@@ -49,7 +48,7 @@ const EventList = () => {
                 setAllEvents(data2);
 
                 const response = await fetch(
-                    `http://127.0.0.1:8000/events/?page=${currentPage}&${filters}&format=json`,
+                    `http://127.0.0.1:8000/events/?${filters}&format=json`,
                     {
                         method: 'GET',
                         headers: {
@@ -67,7 +66,7 @@ const EventList = () => {
         };
 
         fetchData();
-    }, [filters, currentPage]); // 👈 now it listens for filter and page changes
+    }, [filters]); // 👈 now it listens for filter and page changes
 
     const [skillUserList, setskillUserList] = useState([]);
 
@@ -89,43 +88,6 @@ const EventList = () => {
         fetchSkillEvents();
     }, []);
 
-    const handleClickPrev = () => {
-        setCurrentPage(currentPage - 1);
-        const fetchData = async () => {
-            try {
-                const response2 = await fetch(
-                    `http://127.0.0.1:8000/events/?${filters}&format=json`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
-                            // Add any other custom headers here
-                        }
-                    }
-                );
-                const data2 = await response2.json();
-                setAllEvents(data2);
-                const response = await fetch(
-                    `http://127.0.0.1:8000/events/?page=${currentPage - 1}&${filters}&format=json`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
-                            // Add any other custom headers here
-                        }
-                    }
-                );
-                const data = await response.json();
-                setEvents(data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-        fetchData();
-    };
-
     const handleDeleteFilters = () => {
         setFilterName("");
         setFilterStartingDate("");
@@ -134,7 +96,6 @@ const EventList = () => {
         setFilterCreator("");
         setFilterLocation("");
         setFilters("");
-        setCurrentPage(1);
     };
 
     const handleFilterSubmit = async () => {
@@ -148,47 +109,8 @@ const EventList = () => {
 
         const newFilters = f.toString();
         setFilters(newFilters);
-        setCurrentPage(1);
     };
 
-    const handleClickNext = () => {
-        setCurrentPage(currentPage + 1);
-        const fetchData = async () => {
-            try {
-                const response2 = await fetch(
-                    `http://127.0.0.1:8000/events/?${filters}&format=json`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
-                            // Add any other custom headers here
-                        }
-                    }
-                );
-                const data2 = await response2.json();
-                setAllEvents(data2);
-                const response = await fetch(
-                    `http://127.0.0.1:8000/events/?page=${currentPage + 1}&${filters}&format=json`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                            'Content-Type': 'application/json',         //
-                            // optional for GET, but useful for other methods
-                            // Add any other custom headers here
-                        }
-                    }
-                );
-                const data = await response.json();
-                setEvents(data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-
-        fetchData();
-    };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilterName(e.target.value);
@@ -337,7 +259,7 @@ const EventList = () => {
                     })}
                 </div>
             ) : (
-                <div style={{display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", marginTop: "30px"}}>
+                <div style={{display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", marginTop: "100px"}}>
                     {events.map((event, index) => (
 
                         <div
@@ -471,24 +393,6 @@ const EventList = () => {
                 </button>
             )}
 
-
-            <div style={styles.buttonContainer}>
-                <button
-                    style={styles.inputButton}
-                    onClick={handleClickPrev}
-                    disabled={currentPage === 1}
-                >
-                    Prev
-                </button>
-                <span style={{margin: "0 10px"}}>{currentPage}</span>
-                <button
-                    style={styles.inputButton}
-                    onClick={handleClickNext}
-                    disabled={currentPage === Math.ceil(allEvents.length / 10)}
-                >
-                    Next
-                </button>
-            </div>
         </div>
     );
 };

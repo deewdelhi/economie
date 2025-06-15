@@ -1,10 +1,13 @@
 from django.core.paginator import Paginator
-from requests import Response
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 
 from event.models import Event
 from event.serializers import EventSerializer
+from user.models import User
+from user.serializers import UserSerializer
 
 
 class EventList(viewsets.ModelViewSet):
@@ -72,3 +75,25 @@ class EventUserView(APIView):
             events = page_obj.object_list
         serializer = EventSerializer(events, many=True)
         return events
+
+class EventParticipantsView(APIView):
+    def get(self, request, event_id):
+        try:
+            event = Event.objects.get(pk=event_id)
+        except Event.DoesNotExist:
+            return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        participants = event.participants.all()
+        serializer = UserSerializer(participants, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def join_event(request, event_id):
+    try:
+        event = Event.objects.get(pk=event_id)
+    except Event.DoesNotExist:
+        return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    user = request.user
+    event.participants.add(user)
+    return Response({"message": "Successfully joined the event."}, status=status.HTTP_200_OK)
