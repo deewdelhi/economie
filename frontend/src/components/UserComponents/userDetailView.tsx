@@ -7,6 +7,7 @@ import EventDetailsForm from "../EventsComponent/eventDetailsForm.tsx"; // adjus
 import { getAuthToken } from "../../util/auth";
 import { Skill } from "../../models/Skill";
 import { Preference } from "../../models/Preference";
+import AddEventForm from "../EventsComponent/addEventForm.tsx";
 
 const UserProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +36,11 @@ const UserProfile: React.FC = () => {
   };
   const handleMyActivity = () => {
     navigate("/myActivity"); //TODO: work in progress waiting for backend
+  };
+
+  const [showAddEventForm, setShowAddEventForm] = useState(false);
+  const handleAddNewEvent = () => {
+    setShowAddEventForm(true);
   };
 
   useEffect(() => {
@@ -199,7 +205,7 @@ const UserProfile: React.FC = () => {
         </div>
       ))}
 
-      <div style={{ marginTop: 36 }}>
+      {/* <div style={{ marginTop: 36 }}>
         <h2 style={{ fontSize: 22, fontWeight: "700", marginBottom: 12, color: "#a9d6ff" }}>
           My Events
         </h2>
@@ -230,7 +236,7 @@ const UserProfile: React.FC = () => {
             ))}
           </ul>
         )}
-      </div>
+      </div> */}
 
       <button
         onClick={handleUpdateProfile}
@@ -251,6 +257,26 @@ const UserProfile: React.FC = () => {
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#87cefa")}
       >
         Update Profile
+      </button>
+      <button
+        onClick={handleAddNewEvent}
+        style={{
+          marginTop: 32,
+          width: "100%",
+          padding: "12px 0",
+          borderRadius: 8,
+          backgroundColor: "#87cefa",
+          border: "none",
+          color: "#0d1a26",
+          fontWeight: "700",
+          fontSize: 18,
+          cursor: "pointer",
+          transition: "background-color 0.3s ease",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#69b3d9")}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#87cefa")}
+      >
+        Add New Event
       </button>
       <button
         onClick={handlePersonalEvents}
@@ -332,7 +358,50 @@ const UserProfile: React.FC = () => {
             >
               ✕
             </button>
-            <EventDetailsForm eventDetail={selectedEvent} onClose={closeEventDetails} />
+            {/* <EventDetailsForm eventDetail={selectedEvent} onClose={closeEventDetails} /> */}
+          </div>
+        </div>
+      )}
+      {showAddEventForm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#1e293b",
+              borderRadius: 12,
+              padding: 20,
+              maxWidth: 600,
+              width: "90%",
+              position: "relative",
+              color: "#fff",
+            }}
+          >
+            <button
+              onClick={() => setShowAddEventForm(false)}
+              style={{
+                position: "absolute",
+                top: 12,
+                right: 12,
+                background: "none",
+                border: "none",
+                color: "#a9b8cc",
+                fontSize: 24,
+                cursor: "pointer",
+              }}
+              aria-label="Close Add Event Form"
+            >
+              ✕
+            </button>
+            <AddEventForm />
           </div>
         </div>
       )}

@@ -45,7 +45,9 @@ const PersonalEventsList = () => {
                 <div
                     key={event.id}
                     style={styles.card}
-                    onClick={() => navigate(`/events/${event.id}`)}
+
+                    onClick={() =>
+                        navigate(`/events/${event.id}`, { state: event })}
                 >
                     <h3 style={styles.title}>{event.name}</h3>
                     <p style={styles.location}>{event.location}</p>
