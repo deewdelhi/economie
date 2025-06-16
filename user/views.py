@@ -5,6 +5,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView
 from rest_framework.authtoken.models import Token
+
+from event.serializers import EventSerializer
 from user.permissions import IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticated
 
@@ -72,3 +74,12 @@ def rate_user(request, user_id):
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
     return Response({"message": "Successfully rated the user."}, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET'])
+def user_joined_events(request, user_id):
+    user = User.objects.get(pk=user_id)
+    joined_events = user.events.all()
+    serializer = EventSerializer(joined_events, many=True)
+    return Response(serializer.data)
