@@ -95,7 +95,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         zIndex: 1000,
     },
     popup: {
-        backgroundColor: "white",
+        backgroundColor: "#333",
         padding: "40px",
         borderRadius: "10px",
         width: "600px",
@@ -112,7 +112,8 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: "flex",
         alignItems: "center",
         gap: "10px",
-        marginTop: "5px"
+        marginTop: "5px",
+        marginLeft:"200px"
     },
     submitButton: {
         marginLeft: "20px",

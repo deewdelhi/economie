@@ -22,6 +22,7 @@ const EventDetailsForm = () => {
     const [creatorData, setCreatorData] = useState<User>();
 
 
+
     const { state: event } = useLocation();
 
 
@@ -164,6 +165,7 @@ const EventDetailsForm = () => {
             location: event.location,
             preferences: event.preferences,
             skills: event.skills,
+            rating: event.rating,
         });
     }, [event, creatorData]); // ← include creatorData as a dependency
 
@@ -206,7 +208,8 @@ const EventDetailsForm = () => {
         rating: "",
         location: "",
         preferences: "",
-        skills: ""
+        skills: "",
+        rating: ""
     });
 
     const [userRating, setUserRating] = useState<number>(0);
@@ -312,16 +315,16 @@ const EventDetailsForm = () => {
                         </p>
                         <p>
                             <b>
-                                {"Rating: ".concat(
-                                    // String(formData.rating)
-                                )}
+                                {"Location: ".concat(
+                                    String(formData.location)
+                                )}{" "}
                             </b>
                         </p>
                         <p>
                             <b>
-                                {"Location: ".concat(
-                                    String(formData.location)
-                                )}{" "}
+                                {"Rating: ".concat(
+                                    String(formData.rating)
+                                )}
                             </b>
                         </p>
                     </div>
@@ -387,23 +390,6 @@ const EventDetailsForm = () => {
                             {String(event.creator) === String(getUserID()) ? (
                                 // creator buttons ...
                                 <>
-                                    <button
-                                        style={styles.inputButton}
-                                        onClick={() => {
-                                            setDesiredCommand(0);
-                                            openDeletePopup();
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                    <button
-                                        style={styles.inputButton}
-                                        onClick={() => {
-                                            setDesiredCommand(1);
-                                        }}
-                                    >
-                                        Update
-                                    </button>
                                     <button style={styles.inputButton} onClick={fetchParticipants}>
                                         View Participants / Rate
                                     </button>
@@ -439,21 +425,6 @@ const EventDetailsForm = () => {
                                         Join Event
                                     </button>
 
-                                    {/* Show stars and rating only for users who can join */}
-                                    <div style={{ color: "#f5a623", fontSize: "20px", marginTop: 20, marginBottom: 10 }}>
-                                        {Array.from({ length: 5 }).map((_, i) => {
-                                            const starNumber = i + 1;
-                                            return starNumber <= Math.floor(event.average_rating || 0) ? (
-                                                <span key={i}>★</span> // filled star
-                                            ) : (
-                                                <span key={i}>☆</span> // empty star
-                                            );
-                                        })}
-                                        <span style={{ marginLeft: 8, fontSize: "16px", color: "#555" }}>
-                                            ({(event.average_rating || 0).toFixed(2)})
-                                        </span>
-                                    </div>
-
                                     <div style={{ marginBottom: "20px" }}>
                                         <label style={{ marginRight: 10 }}>Rate this event:</label>
                                         {[1, 2, 3, 4, 5].map((star) => (
@@ -486,9 +457,7 @@ const EventDetailsForm = () => {
 
                             {/* Delete and Update popups */}
                             {desiredCommand === 0 && isDeletePopupOpen && (
-                                <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
-                                    <DeleteEvent eventToDelete={event} />
-                                </Popup>
+                                <DeleteEvent eventToDelete={event} />
                             )}
                             {desiredCommand === 1 && <UpdateEventForm eventToUpdate={event} />}
                         </div>
@@ -497,9 +466,7 @@ const EventDetailsForm = () => {
                     )}
 
                     {desiredCommand === 0 && isDeletePopupOpen && (
-                        <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
-                            <DeleteEvent eventToDelete={event} />
-                        </Popup>
+                        <DeleteEvent eventToDelete={event} />
                     )}
                     {desiredCommand === 1 && (
                         <UpdateEventForm eventToUpdate={event} />
@@ -513,104 +480,91 @@ const EventDetailsForm = () => {
 };
 
 const styles: { [key: string]: CSSProperties } = {
-    title: {
-        alignItems: "center",
-        background: "#ecb753",
-    },
     overlay: {
         position: "fixed",
         top: 0,
         left: 0,
         width: "100%",
         height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "black",
-        background: "rgba(107, 107, 107, 0.8)", // Adjust the alpha value to control transparencyyyy
+        zIndex: 1000,
     },
     modal: {
-        background: "white",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
-        textAlign: "left",
-        width: "80%", // Set the width as needed
-        height: "80%", // Set the height as needed
-        overflow: "auto", // Add scrollbar if content exceeds the available space
+        background: "#fff",
+        padding: "30px",
+        borderRadius: "16px",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
+        width: "90%",
+        maxWidth: "1000px",
+        maxHeight: "90%",
+        overflowY: "auto",
         boxSizing: "border-box",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        backgroundColor: "#333",
     },
-    form: {
-        display: "flex",
-        flexDirection: "column" as "column",
-        alignItems: "center",
-    },
-    label: {
-        marginBottom: 10,
-        textAlign: "center",
-    },
-    button: {
-        padding: "10px",
-        marginTop: "10px",
-    },
-
     header: {
         display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "10px",
+        justifyContent: "flex-end",
+        marginBottom: "20px",
     },
-
     exitButton: {
-        backgroundColor: "red",
+        backgroundColor: "#dc3545",
         border: "none",
         color: "#fff",
-        cursor: "pointer",
         fontSize: "16px",
+        padding: "10px 16px",
+        borderRadius: "6px",
+        cursor: "pointer",
+        transition: "0.3s",
     },
-
-    content: {
-        overflow: "auto", // Add scrollbar if content exceeds the available space
-        maxHeight: "calc(100% - 40px)", // Set the maximum height, considering header and padding
+    title: {
+        textAlign: "center",
+        fontSize: "28px",
+        fontWeight: "bold",
+        marginBottom: "20px",
+        color: "#333",
     },
-    generic: {
-        color: "white",
+    preferencesAndPhotoContainer: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "40px",
+        marginBottom: "20px",
+    },
+    infoContainer: {
+        flex: 1,
+        minWidth: "300px",
+    },
+    preferencesContainer: {
+        flex: 1,
+        minWidth: "200px",
+    },
+    descriptionContainer: {
+        background: "#333",
+        padding: "20px",
+        borderRadius: "8px",
+        marginTop: "20px",
+        marginBottom: "20px",
     },
     inputButton: {
-        backgroundColor: "rgba(135, 206, 250,0.8)", // Dark yellow button color
-        color: "#333333", // Dark gray text color
-        padding: "10px",
+        backgroundColor: "rgba(121, 156, 178, 1)",
+        color: "#fff",
+        padding: "10px 20px",
         fontSize: "16px",
         border: "none",
         borderRadius: "5px",
         cursor: "pointer",
-        marginRight: "20px",
-        marginLeft: "20px",
+        margin: "10px",
+        transition: "0.2s",
     },
-
-    preferencesAndPhotoContainer: {
+    buttonContainer: {
         display: "flex",
-        //flexDirection: "column", // Display children in a column
-        alignItems: "flex-start", // Align items to the start of the cross axis
-        justifyContent: "space-evenly",
-    },
-    preferencesContainer: {
-        marginBottom: "20px", // Add margin between preferences and photo
-    },
-    photoContainer: {
-        alignSelf: "flex-start", // Align photo to the start of the cross axis
-    },
-    infoContainer: {
-        display: "flex",
-        flexDirection: "column",
-    },
-    descriptionContainer: {
-        marginRight: "40px",
-        marginLeft: "40px",
-        marginBottom: "40px",
-        marginTop: "40px",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: "15px",
+        marginTop: "30px",
     },
 };
-
 export default EventDetailsForm;

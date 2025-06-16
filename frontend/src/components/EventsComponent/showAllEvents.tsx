@@ -135,8 +135,8 @@ const EventList = () => {
                             onClick={() => setViewOption("matching")}
                             style={{
                                 padding: "8px 12px",
-                                backgroundColor: viewOption === "matching" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
-                                border: "1px solid #ccc",
+                                backgroundColor: viewOption === "matching" ? "rgba(121, 156, 178, 1)" : "rgba(107, 107, 107, 0.8)",
+                                border: "1px solid ",
                                 borderRadius: "14px",
                                 cursor: "pointer",
                                 marginLeft: "300px"
@@ -148,8 +148,8 @@ const EventList = () => {
                             onClick={() => setViewOption("all")}
                             style={{
                                 padding: "8px 12px",
-                                backgroundColor: viewOption === "all" ? "rgba(121, 156, 178, 1)" : "#f0f0f0",
-                                border: "0px solid #ccc",
+                                backgroundColor: viewOption === "all" ? "rgba(121, 156, 178, 1)" : "rgba(107, 107, 107, 0.8)",
+                                border: "0px solid ",
                                 borderRadius: "14px",
                                 cursor: "pointer",
                                 marginLeft: "20px"
@@ -446,7 +446,7 @@ const styles: { [key: string]: CSSProperties } = {
 
     listItem: {
         width: "400px",
-        border: "1px solid #ecb753",
+        border: "1px solid ",
         borderRadius: "5px",
         padding: "15px",
         boxSizing: "border-box",
@@ -454,7 +454,7 @@ const styles: { [key: string]: CSSProperties } = {
         flexDirection: "column",
     },
     evenItem: {
-        backgroundColor: "#ffffff",
+        backgroundColor: "#A3C1D9",
         color: "black",
     },
     oddItem: {
@@ -469,8 +469,8 @@ const styles: { [key: string]: CSSProperties } = {
         cursor: "pointer",
     },
     whiteButton: {
-        backgroundColor: "#ffffff",
-        color: "rgba(121, 156, 178, 1)",
+        backgroundColor: "#A3C1D9",
+        color: "#ffffff",
     },
     yellowButton: {
         backgroundColor: "rgba(121, 156, 178, 1)",
@@ -502,13 +502,13 @@ const styles: { [key: string]: CSSProperties } = {
         zIndex: 1000,
     },
     modalContent: {
-        backgroundColor: "black",
+        backgroundColor: "#333",
         padding: "20px",
         borderRadius: "10px",
         width: "400px",
         display: "flex",
         flexDirection: "column",
-        gap: "10px",
+        gap: "15px",
     },
 
     userIconWrapper: {

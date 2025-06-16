@@ -1,93 +1,109 @@
 import { CSSProperties, useState } from "react";
 import { getAuthToken } from "../../util/auth";
-import EventDetailsForm from "./eventDetailsForm.tsx";
 
-const DeleteEvent = (props: { eventToDelete: any }) => {
-    const [shouldShow, setShouldShow] = useState<number>(1);
+const DeleteEvent = ({ eventToDelete }: { eventToDelete: any }) => {
+    const [shouldShow, setShouldShow] = useState(true);
 
-    const handleDelete = async (event: { preventDefault: () => void }) => {
+    const handleDelete = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log(" about to delete this");
-        console.log(props.eventToDelete.id);
-        // Delay navigation by 2 seconds
-        setTimeout(() => {
 
-        }, 10000);
-        // const [shouldShow, setShouldShow] = useState<number>(1);
-
-        fetch(`http://127.0.0.1:8000/events/${props.eventToDelete.id}/`, {
-            method: "DELETE",
-            headers: {
-                'Authorization': `token ${getAuthToken()}`, // if you're using token auth
-                'Content-Type': 'application/json',         // optional for GET, but useful for other methods
-            }
-        })
-            .then((response) => {
-                response.json();
-                console.log(response);
-            })
-            .then((data) => {
-                console.log(data);
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/events/${eventToDelete.id}/`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `token ${getAuthToken()}`,
+                    "Content-Type": "application/json",
+                },
             });
-        // Delay navigation by 2 seconds
-        setTimeout(() => {
 
-        }, 10000);
-        setTimeout(() => {
-            const isUserEventPage =
-                window.location.href.includes("/userEvents");
-
-            if (isUserEventPage) {
-                window.location.href = `/userEvents/`;
-            } else {
-                window.location.href = `/showlist/`;
+            if (!response.ok) {
+                console.error("Failed to delete event.");
+                return;
             }
-            //setShouldShow(0);
-        }, 500);
+
+            // Delay navigation after deletion
+            setTimeout(() => {
+                const isUserEventPage = window.location.href.includes("/userEvents");
+                window.location.href = isUserEventPage ? "/userEvents/" : "/showlist/";
+            }, 500);
+
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
     };
 
     const handleCancel = () => {
         const isUserEventPage = window.location.href.includes("/userEvents");
-
-        if (isUserEventPage) {
-            window.location.href = `/userEvents/`;
-        } else {
-            window.location.href = `/showlist/`;
-        }
-        //setShouldShow(0);
-        // <EventDetailsForm eventDetail={props.eventToDelete} />;
+        window.location.href = isUserEventPage ? "/userEvents/" : "/showlist/";
     };
 
-    if (shouldShow == 1) {
-        return (
-            <div id="dialog-content">
-                <p>Are you sure you want to delete this item?</p>
-                <div id="buttons-container">
-                    <button style={styles.inputButton} onClick={handleDelete}>
+    if (!shouldShow) return null;
+
+    return (
+        <div style={styles.overlay}>
+            <div style={styles.dialogBox}>
+                <p style={styles.text}>Are you sure you want to delete this event?</p>
+                <div style={styles.buttonContainer}>
+                    <button style={styles.confirmButton} onClick={handleDelete}>
                         Yes
                     </button>
-                    <button style={styles.inputButton} onClick={handleCancel}>
-                        I am a COWARD
+                    <button style={styles.cancelButton} onClick={handleCancel}>
+                        Cancel
                     </button>
                 </div>
             </div>
-        );
-    } else {
-        return;
-    }
+        </div>
+    );
 };
 
 const styles: { [key: string]: CSSProperties } = {
-    inputButton: {
-        backgroundColor: "#ecb753", // Dark yellow button color
-        color: "#333333", // Dark gray text color
-        padding: "10px",
+    overlay: {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+    },
+    dialogBox: {
+        backgroundColor: "#333",
+        padding: "30px",
+        borderRadius: "10px",
+        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
+        textAlign: "center",
+        maxWidth: "400px",
+        width: "90%",
+    },
+    text: {
+        fontSize: "18px",
+        marginBottom: "20px",
+    },
+    buttonContainer: {
+        display: "flex",
+        justifyContent: "space-around",
+        gap: "20px",
+    },
+    confirmButton: {
+        backgroundColor: "#d9534f",
+        color: "white",
+        padding: "10px 20px",
         fontSize: "16px",
         border: "none",
         borderRadius: "5px",
         cursor: "pointer",
-        marginRight: "20px",
-        marginLeft: "20px",
+    },
+    cancelButton: {
+        backgroundColor: "#5bc0de",
+        color: "white",
+        padding: "10px 20px",
+        fontSize: "16px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
     },
 };
 

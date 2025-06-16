@@ -91,6 +91,8 @@ class EventParticipantsView(APIView):
 def join_event(request, event_id):
     try:
         event = Event.objects.get(pk=event_id)
+        event.capacity -= 1
+        event.save()
     except Event.DoesNotExist:
         return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
 
