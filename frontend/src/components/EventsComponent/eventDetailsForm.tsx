@@ -1,12 +1,13 @@
-import {useState, useEffect, CSSProperties} from "react";
-import {Preference} from "../../models/Preference";
+import { useState, useEffect, CSSProperties } from "react";
+import { Preference } from "../../models/Preference";
+import { User } from "../../models/User";
 
-import {getAuthToken, getUserID} from "../../util/auth";
-import {Skill} from "../../models/Skill.ts";
+import { getAuthToken, getUserID } from "../../util/auth";
+import { Skill } from "../../models/Skill.ts";
 import Popup from "./PopUp.tsx";
 import DeleteEvent from "./deleteEvent.tsx";
 import UpdateEventForm from "./updateEventForm.tsx";
-import {useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import ParticipantRatingPopup from "./ParticipantRating.tsx";
 
 
@@ -18,9 +19,10 @@ const EventDetailsForm = () => {
 
     const [participants, setParticipants] = useState<any[]>([]);
     const [isParticipantPopupOpen, setParticipantPopupOpen] = useState(false);
+    const [creatorData, setCreatorData] = useState<User>();
 
 
-    const {state: event} = useLocation();
+    const { state: event } = useLocation();
 
 
     const openDeletePopup = () => {
@@ -85,9 +87,8 @@ const EventDetailsForm = () => {
                     }
                 );
                 const data = await response.json();
-                console.log("0000000000000000000000000000000000");
-                console.log(data);
                 setPreferences(data);
+                ///////////////////////////////////////////////
                 const response2 = await fetch(
                     "http://127.0.0.1:8000/skills/?format=json",
                     {
@@ -101,6 +102,21 @@ const EventDetailsForm = () => {
                 );
                 const data2 = await response2.json();
                 setSkills(data2);
+                //////////////////////////////////////////////////////
+
+                const response3 = await fetch(
+                    `http://127.0.0.1:8000/users/${event.creator}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `token ${getAuthToken()}`, // if you're using token auth
+                            'Content-Type': 'application/json',         // optional for GET, but useful for other methods
+                            // Add any other custom headers here
+                        }
+                    }
+                );
+                const data3 = await response3.json();
+                setCreatorData(data3);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -111,10 +127,6 @@ const EventDetailsForm = () => {
 
     const currentPreferencesSet = new Set();
     const currentSkillsSet = new Set();
-    console.log("---------------------------");
-    console.log(event);
-    console.log("---------------------------");
-    // console.log(event.skills);
 
     event.preferences.forEach((item: number) => {
 
@@ -138,26 +150,22 @@ const EventDetailsForm = () => {
     });
     const currentPreferences = Array.from(currentPreferencesSet);
     const currentSkills = Array.from(currentSkillsSet);
-    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-    console.log(currentPreferences);
-    console.log(currentSkills);
-
     useEffect(() => {
+        if (!creatorData) return; // wait until creatorData is available
+
         setFormData({
             name: event.name,
             description: event.description,
             starting_date: event.starting_date,
             ending_date: event.ending_date,
-            creator: event.creator,
+            creator: creatorData.username,
             capacity: event.capacity,
             rating: event.rating,
             location: event.location,
             preferences: event.preferences,
-            skills: event.skills
+            skills: event.skills,
         });
-        // console.log(event?.photo);
-        console.log("cvbhnjkl;");
-    }, [event]);
+    }, [event, creatorData]); // ← include creatorData as a dependency
 
     useEffect(() => {
         const eventPreferences = preferences.filter(
@@ -195,6 +203,7 @@ const EventDetailsForm = () => {
         ending_date: "",
         creator: "",
         capacity: "",
+        rating: "",
         location: "",
         preferences: "",
         skills: ""
@@ -431,8 +440,8 @@ const EventDetailsForm = () => {
                                     </button>
 
                                     {/* Show stars and rating only for users who can join */}
-                                    <div style={{color: "#f5a623", fontSize: "20px", marginTop: 20, marginBottom: 10}}>
-                                        {Array.from({length: 5}).map((_, i) => {
+                                    <div style={{ color: "#f5a623", fontSize: "20px", marginTop: 20, marginBottom: 10 }}>
+                                        {Array.from({ length: 5 }).map((_, i) => {
                                             const starNumber = i + 1;
                                             return starNumber <= Math.floor(event.average_rating || 0) ? (
                                                 <span key={i}>★</span> // filled star
@@ -440,13 +449,13 @@ const EventDetailsForm = () => {
                                                 <span key={i}>☆</span> // empty star
                                             );
                                         })}
-                                        <span style={{marginLeft: 8, fontSize: "16px", color: "#555"}}>
-          ({(event.average_rating || 0).toFixed(2)})
-        </span>
+                                        <span style={{ marginLeft: 8, fontSize: "16px", color: "#555" }}>
+                                            ({(event.average_rating || 0).toFixed(2)})
+                                        </span>
                                     </div>
 
-                                    <div style={{marginBottom: "20px"}}>
-                                        <label style={{marginRight: 10}}>Rate this event:</label>
+                                    <div style={{ marginBottom: "20px" }}>
+                                        <label style={{ marginRight: 10 }}>Rate this event:</label>
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <span
                                                 key={star}
@@ -458,8 +467,8 @@ const EventDetailsForm = () => {
                                                 }}
                                                 onClick={() => setUserRating(star)}
                                             >
-            ★
-          </span>
+                                                ★
+                                            </span>
                                         ))}
                                         <button
                                             style={{
@@ -478,10 +487,10 @@ const EventDetailsForm = () => {
                             {/* Delete and Update popups */}
                             {desiredCommand === 0 && isDeletePopupOpen && (
                                 <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
-                                    <DeleteEvent eventToDelete={event}/>
+                                    <DeleteEvent eventToDelete={event} />
                                 </Popup>
                             )}
-                            {desiredCommand === 1 && <UpdateEventForm eventToUpdate={event}/>}
+                            {desiredCommand === 1 && <UpdateEventForm eventToUpdate={event} />}
                         </div>
 
 
@@ -489,11 +498,11 @@ const EventDetailsForm = () => {
 
                     {desiredCommand === 0 && isDeletePopupOpen && (
                         <Popup isOpen={isDeletePopupOpen} onClose={closeDeletePopup}>
-                            <DeleteEvent eventToDelete={event}/>
+                            <DeleteEvent eventToDelete={event} />
                         </Popup>
                     )}
                     {desiredCommand === 1 && (
-                        <UpdateEventForm eventToUpdate={event}/>
+                        <UpdateEventForm eventToUpdate={event} />
                     )}
 
                 </div>

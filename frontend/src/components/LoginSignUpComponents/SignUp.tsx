@@ -228,6 +228,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: "column",
     marginBottom: "12px",
     width: "100%",
+
   },
   inputBox: {
     height: "44px",
@@ -238,6 +239,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: "white",
     outline: "none",
     width: "100%",
+    color: "rgba(50, 50, 50, 0.85)  "
   },
   passwordInputContainer: {
     display: "flex",
