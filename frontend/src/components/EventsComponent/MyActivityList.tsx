@@ -13,7 +13,7 @@ const MyActivityList = () => {
         const fetchEvents = async () => {
             try {
                 const userId = getUserID();
-                const response = await fetch(`http://127.0.0.1:8000/events/?creator=${userId}`, {
+                const response = await fetch(`http://127.0.0.1:8000/users/${userId}/events-joined/`, {
                     method: "GET",
                     headers: {
                         Authorization: `token ${getAuthToken()}`,
@@ -24,6 +24,8 @@ const MyActivityList = () => {
                     throw new Error("Failed to fetch events");
                 }
                 const data = await response.json();
+                console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                console.log(data);
                 setEvents(data);
             } catch (err: any) {
                 setError(err.message || "Something went wrong");
@@ -45,7 +47,8 @@ const MyActivityList = () => {
                 <div
                     key={event.id}
                     style={styles.card}
-                    onClick={() => navigate(`/event/${event.id}`)}
+                    onClick={() =>
+                        navigate(`/events/${event.id}`, { state: event })}
                 >
                     <h3 style={styles.title}>{event.name}</h3>
                     <p style={styles.location}>{event.location}</p>
