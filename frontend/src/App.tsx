@@ -52,27 +52,18 @@ import WelcomePage from "./components/LoginSignUpComponents/FirstPageWithInfo.ts
 import PersonalEventsList from "./components/EventsComponent/PersonalEventList.tsx";
 import MyActivityList from "./components/EventsComponent/MyActivityList.tsx";
 import EventDetailsPage from "./components/EventsComponent/eventDetailsForm.tsx";
-// import Logout from "./components/LoginSignUpComponents/Logout";
-
-// import UserRecipeList from "./components/RecipeComponents/userRecipes";
-// import RecipeDetailsForm from "./components/RecipeComponents/recipeDetailsForm.tsx";
-// import BadJokeForm from "./components/RecipeComponents/BadJokeForm.tsx";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
 
-  // return (
-  //     <>
-  //         <ShowAllRecipes></ShowAllRecipes>
-  //     </>
-  // );
+
 
   return (
     <div className="App">
       <Routes>
         <Route
-          path="/"
+          path="/getStarted"
           element={
             <Welcome
               email={email}
@@ -88,10 +79,17 @@ function App() {
             <Login setLoggedIn={setLoggedIn} setEmail={setEmail} />
           }
         />
+
         <Route
-          path="/welcome"
+          path="/"
           element={
             <WelcomePage />
+          }
+        />
+        <Route
+          path="/donate"
+          element={
+            <Donate />
           }
         />
         <Route
@@ -109,13 +107,6 @@ function App() {
         <Route path="/logout" element={<Logout></Logout>} />
         <Route path="/personalEvents" element={<PersonalEventsList></PersonalEventsList>} />
         <Route path="/myActivity" element={<MyActivityList></MyActivityList>} />
-
-
-        {/*<Route*/}
-
-        {/*    path="/userRecipes/*"*/}
-        {/*    element={<UserRecipeList ></UserRecipeList>}*/}
-        {/*/> */}
       </Routes>
     </div>
   );

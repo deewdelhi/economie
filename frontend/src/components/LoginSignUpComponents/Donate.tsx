@@ -21,7 +21,16 @@ const Donate = () => {
     const handleCancel = () => {
         setShouldShow(0);
         const isUserEventPage = window.location.href.includes("/userEvents");
-        window.location.href = isUserEventPage ? `/userEvents/` : `/showlist/`;
+        const isShowlist = window.location.href.includes("/showlist");
+        if (isUserEventPage) {
+            window.location.href = `/userEvents/`;
+        } else if (isShowlist) {
+            window.location.href = `/showlist/`;
+        } else {
+            window.location.href = `/`;
+        }
+
+
     };
 
     if (shouldShow !== 1) return null;
